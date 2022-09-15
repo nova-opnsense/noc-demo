@@ -1,0 +1,135 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Teamcity*
+:toc: left
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|05/13/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *Setup Environment*
+
+Ubuntu 20.04 (Memory: 16GB, Disk: 64GB)
+
+PostgreSQL 12
+
+Java 11
+
+== *Install Java*
+Download Linux distribution JDK 11 at https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html
+
+Extract Jdk:
+[source,text]
+----
+tar xfz jdk-<version number>_bin.tar.gz
+----
+Setup JAVA_HOME environments and Java Heap size for Teamcity
+[source,text]
+----
+nano ~/.bashrc
+----
+Add following lines:
+[source,text]
+----
+export JAVA_HOME=/path/java_dir_extracted
+export PATH=$PATH:$JAVA_HOME/bin
+
+export TEAMCITY_SERVER_MEM_OPTS="-Xms1024m -Xmx1536m -XX:PermSize=256m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+----
+[source,text]
+----
+source ~/.bashrc
+----
+
+== *Install Teamcity*
+
+Download Teamcity .tar.gz distribution at JetBrains website: https://www.jetbrains.com/teamcity/download/
+
+Extract Teamcity:
+[source,text]
+----
+tar xfz TeamCity<version number>.tar.gz
+----
+
+Start Teamcity:
+[source,text]
+----
+./TEAMCITY_DIR/bin/teamcity-server.sh start
+----
+
+Launch TeamCity UI
+
+Open your web browser and type the URL http://localhost:8111
+
+:imagesdir: ../../../assets/images
+image::app/teamcity1.jpg[image]
+
+Choose PostgreSQL:
+
+:imagesdir: ../../../assets/images
+image::app/teamcity2.jpg[image]
+
+Fulfill Database connection:
+
+:imagesdir: ../../../assets/images
+image::app/teamcity3.jpg[image]
+
+Create admin account:
+
+:imagesdir: ../../../assets/images
+image::app/teamcity4.jpg[image]
+
+== *Install Teamcity Agent*
+Download teamcity agent distribution at
+http://localhost:8111/update/buildAgent.zip
+
+Unzip
+[source,text]
+----
+unzip buildAgent.zip
+----
+
+Create configuration file:
+[source,text]
+----
+cp AGENT_DIR/conf/buildAgent.dist.properties AGENT_DIR/conf/buildAgent.properties
+----
+
+Update Java Heap Size for Teamcity Agent
+[source,text]
+----
+nano ~/.bashrc
+----
+Add following lines:
+[source,text]
+----
+export TEAMCITY_AGENT_MEM_OPTS="-Xms1024m -Xmx1536m -XX:PermSize=256m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+----
+[source,text]
+----
+source ~/.bashrc
+----
+
+Start Agent
+[source,text]
+----
+./AGENT_DIR/bin/agent.sh start
+----
+
+
+

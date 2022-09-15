@@ -1,0 +1,181 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Quality*
+:toc: left
+
+:pic:       Tho Do
+
+== *Overview*
+Mesh Quality show all metric of all node in Mesh Network: +
+- Tx Link +
+- SNR +
+- Noise Floor +
+- Tx Total +
+- Rx Total +
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+| 06/07/2022
+|{pic}
+| 2.0.1
+| Add new API for Mesh Quality 
+
+|===
+
+
+== *Data model*
+
+=== *Mesh Quality Structure*
+
+[source,json]
+----
+[
+    {
+      "src_link": <string><not null>,
+      "quality": [
+        {
+          "dest_link": <string><not null>,
+          "channel": <int>,
+          "up_link": <bool>,
+          "down_link": <bool>,
+          "tx_link": <int>,
+          "snr": <int>,
+          "noise_floor": <int>,
+          "tx_total": <int>,
+          "rx_total": <int>
+        },
+        {
+          "dest_link": <string><not null>,
+          "channel": <int>,
+          "up_link": <bool>,
+          "downlink": <bool>,
+          "tx_link": <int>,
+          "snr": <int>,
+          "noise_floor": <int>,
+          "tx_total": <int>,
+          "rx_total": <int>
+        }
+      ]
+    }
+]
+----
+
+== *API*
+
+=== *Request Quality*
+==== Flow
+[plantuml, "request_mesh_quality", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Request Mesh Quality.
+alt success case
+Ezm -> Ezm:  Get Mesh Quality from Mesh Deamon
+Ezm --> Web: Return Mesh Quality
+else failed case
+autonumber 2 1
+Ezm --> Web: Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.quality.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.quality.responded",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<mesh_quality_structure>,
+    "created_time": <int>
+}
+----
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|===
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240002
+|Pair Fail
+
+|240003
+|Device Not Found
+
+|240004
+|Mesh is Setuped Before
+
+|240005
+|Mesh not found
+
+|240006
+|Request name invalid
+
+|240007
+|Easymesh Deamon connect fail
+
+|===
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Create Data Model
+* [ ] Get Data Raw from Ezmesh Deamon.
+* [ ] Parse Data.
+* [ ] Create API.
+

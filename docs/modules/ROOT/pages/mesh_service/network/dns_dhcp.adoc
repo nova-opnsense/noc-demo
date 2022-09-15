@@ -1,0 +1,463 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *DNS-DHCP*
+:toc: left
+
+:Date:      01/07/2022
+:pic:       Tho Do
+:version:   0.1
+
+== *Overview*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|DNS-DHCP
+|Config DNS Server and DHCP
+
+|{counter:feature}
+|DHCP Lease
+|Get End Device List in Current Mesh
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Initial Docs
+
+|===
+
+
+== *Data model*
+
+
+=== DHCP-Info structure
+
+[source,json]
+----
+{
+    "timestamp": <int>,
+    "mac": <string>,
+    "ip": <string>,
+    "host_name": <string>
+}
+----
+
+=== Custom-hostname structure
+
+[source,json]
+----
+{
+    "name": <string>,
+    "domain": <string>,
+    "ip": <string>
+}
+----
+
+=== DNS structure
+
+[source,json]
+----
+{
+    "custom_hostname": <custom_hostname_t[]>,
+    "nb_host_name": <string>,
+    "additional_dns": <string[]>,
+    "nb_additional_dns": <int>,
+    "forwarding_dns": <string>,
+    "forwarding_dns_enabled": <bool>
+}
+----
+
+=== DHCP4 structure
+
+[source,json]
+----
+{
+    "start_ip": <string>,
+    "pools": <int>,
+    "relay_enabled": <bool>,
+    "relay_server_address": <string>,
+    "relay_local_address": <string>,
+    "static_dhcp4_clients": <dhcp_info_t[]>,
+    "nb_static_dhcp4_client": <int>,
+}
+----
+
+
+=== DNS-DHCP structure
+
+[source,json]
+----
+{
+    "dns": <dns_t>,
+    "dhcp4": <dhcp4_t>
+}
+----
+
+
+=== DHCP4_Lease structure
+
+[source,json]
+----
+{
+    "list_device": <dhcp_info_t[]>,
+    "nb_device": <int>
+}
+----
+
+== *API*
+=== *Create DNS-DHCP*
+==== Request
+[source,json]
+----
+{
+  "name": "hub.ezm.network.dns_dhcp.created",
+  "source": "hub",
+  "data": {
+    "dns": {
+        "custom_hostname": [
+            {
+            "name": "Authenticate",
+            "domain": "auth.nova",
+            "ip": "192.168.124.1"
+            },
+            {
+            "name": "Cap",
+            "domain": "cap.nova",
+            "ip": "192.168.124.1"
+            }
+        ],
+        "additional_dns": [
+            "8.8.8.8",
+            "8.8.4.4"
+        ],
+        "forwarding_dns": null,
+        "forwarding_dns_enabled": false
+    },
+    "dhcp4": {
+        "start_ip": "192.168.124.5",
+        "pools": 100,
+        "relay_enabled": false,
+        "relay_server_address": "192.168.1.1",
+        "relay_local_address": "192.168.124.1",
+        "static_dhcp4_clients": [
+            {
+                "mac": "aa:bb:cc:dd:ee:ff",
+                "ip": "192.168.34.199",
+                "host_name": "sample"
+            }
+        ]
+    }
+    }
+}
+----
+==== Respond
+[source,json]
+----
+{
+  "name": "hub.ezm.network.dns_dhcp.created",
+  "source": "hub",
+  "data": {
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data":{
+            "dns": {
+            "custom_hostname": [
+                {
+                "name": "Authenticate",
+                "domain": "auth.nova",
+                "ip": "192.168.124.1"
+                },
+                {
+                "name": "Cap",
+                "domain": "cap.nova",
+                "ip": "192.168.124.1"
+                }
+            ],
+            "additional_dns": [
+                "8.8.8.8",
+                "8.8.4.4"
+            ],
+            "forwarding_dns": null,
+            "forwarding_dns_enabled": false
+            },
+            "dhcp4": {
+                "start_ip": "192.168.124.5",
+                "pools": 100,
+                "relay_enabled": false,
+                "relay_server_address": "192.168.1.1",
+                "relay_local_address": "192.168.124.1",
+                "static_dhcp4_clients": [
+                    {
+                        "mac": "aa:bb:cc:dd:ee:ff",
+                        "ip": "192.168.34.199",
+                        "host_name": "sample"
+                    }
+                ]
+            }
+        }
+    }
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|100001
+|Unknown
+
+|100002
+|Setting Failed
+
+|100004
+|Internal Server Error - Fail to set uci configuration
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+
+=== *Request DNS-DHCP*
+==== Request
+[source,json]
+----
+{
+    "name": "hub.ezm.network.dns_dhcp.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+==== Respond
+[source,json]
+----
+{
+  "name": "ezm.hub.network.dns_dhcp.created",
+  "source": "hub",
+  "data": {
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data":{
+            "dns": {
+            "custom_hostname": [
+                {
+                "name": "Authenticate",
+                "domain": "auth.nova",
+                "ip": "192.168.124.1"
+                },
+                {
+                "name": "Cap",
+                "domain": "cap.nova",
+                "ip": "192.168.124.1"
+                }
+            ],
+            "additional_dns": [
+                "8.8.8.8",
+                "8.8.4.4"
+            ],
+            "forwarding_dns": null,
+            "forwarding_dns_enabled": false
+            },
+            "dhcp4": {
+                "start_ip": "192.168.124.5",
+                "pools": 100,
+                "relay_enabled": false,
+                "relay_server_address": "192.168.1.1",
+                "relay_local_address": "192.168.124.1",
+                "static_dhcp4_clients": [
+                    {
+                        "mac": "aa:bb:cc:dd:ee:ff",
+                        "ip": "192.168.34.199",
+                        "host_name": "sample"
+                    }
+                ]
+            }
+        }
+    }
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+=== *Request DHCP4 Lease*
+==== Request
+[source,json]
+----
+{
+    "name": "hub.ezm.network.dhcp4.leases.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "emz.hub.network.dhcp4.leases.responded",
+    "scope": "",
+    "source": "hub",
+    "home_id": "",
+    "user_id": "",
+    "id": "",
+    "auth_token": "",
+    "parent_id": "",
+    "client_id": "hub_72816a68-0278-449f-b2ff-6d751b28ccd0",
+    "data": {
+        "error": {
+            "code": <int>,
+            "message": <string>
+        },
+        "data": [
+            {
+                "id": "",
+                "mac": "90:b0:ed:ca:07:d4",
+                "ip": "192.168.123.214",
+                "host_name": "iPhone"
+            }
+        ]
+    },
+    "created_time": 1655808459011
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|100001
+|Unknown
+
+|100002
+|Setting Failed
+
+|100004
+|Internal Server Error - Fail to set uci configuration
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|100001
+|Unknown
+
+|100002
+|Setting Failed
+
+|100003
+|Interface Convert failed
+
+|100004
+|Internal Server Error
+
+|100005
+|Unauthorized
+
+|100006
+|ID Mismatched
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] API Define.
+* [ ] DNS_DHCP Process.
+* [ ] DHCP4 Leases.
+

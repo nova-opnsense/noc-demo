@@ -1,0 +1,207 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Functional testing*
+:toc: left
+
+:Date:      03/06/2022
+:pic:       Tung Nguyen
+:version:   0.1
+
+== *Overview*
+
+=== *Design*
+image::functional_testing/inside_router.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Zigbee, Ble and Host (Wifi) MCUs in the same 
+board.
+
+
+image::functional_testing/zigbee_block.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Zigbee connection pins with Host.
+
+
+
+image::functional_testing/software_design.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Zigbee Service gateway communication with others.
+
+
+=== *Functional Testing*
+
+Zigbee Gateway Functional testing aims to test all basic feaures of Zigbee 
+service. These are:
+
+
+
+
+* *Hardware connection and running zigbee service:* +
+Check port/driver is already bring up. Then running zigbee service.
+
+image::functional_testing/hardware_connection.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Hardware Driver connection.
+
+
+* *Update firmware for hardware:* +
+Test upload new firmware in Zigbee Module in router. Make sure after delivery 
+to our customer, we can update new version compatible with Zigbee service.
+
+image::functional_testing/ncp_update.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Update firmware Zigbee module.
+
+
+* *Basic zigbee communication:* +
+Test Zigbee network 1vs1 with "Golden End Device" sample. Collect {RSSI, LQI} 
+for basic verify RF hardware.
+
+image::functional_testing/basic_zigbee_communication.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Collect {RSSI, LQI} from Golden sample.
+
+
+* *Basic service communication:* +
+Test Connect broker, communicate with Hub service. 
+
+image::functional_testing/software_com.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Test with Hub service.
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Zigbee Functional Testing
+
+|===
+
+== *Description*
+
+=== *Functional testing flowchart*
+
+image::functional_testing/flowchart.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Flowchart.
+
+=== *Test 1: Hardware connection*
+
+image::functional_testing/test1.svg[align="center"]
+[.text-center]
+Figure {counter:figure}. Test 1: Hardware connection.
+
+
+
+=== *Test 2: Zigbee Firmware update*
+
+image::functional_testing/test2.svg[align="center", 640]
+[.text-center]
+Figure {counter:figure}. Test 2: Zigbee Firmware update.
+
+=== *Test 3: Zigbee communication with "golden-sample"*
+
+image::functional_testing/test3.svg[align="center", 640]
+[.text-center]
+Figure {counter:figure}. Test 3: Test with "golden-sample".
+
+=== *Test 4: Software testing*
+
+image::functional_testing/test4.svg[align="center", 640]
+[.text-center]
+Figure {counter:figure}. Test 4: Software testing.
+
+=== *Zigbee test API*
+
+==== *Script command and file result*
+
+* *Script command: "sh /data/database/zib/functional_testing.sh"*
+
+* *Filepath: /data/database/zib/functional_testing.json*
+[source,json]
+----
+{
+  "code": <int>,
+  "message": <string>
+}
+----
+
+==== *Result definition*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*ID*
+|*Result*
+|*Description*
+
+|0
+|ERR_CODE_SUCCESS
+|All test case pass
+
+|1
+|ERR_CODE_UART_DRIVER_FAIL
+|Driver uart down
+
+|2
+|ERR_CODE_RUN_SERVICE_FAIL
+|Zigbee Service segmentation; +
+Hardware PCB fail
+
+|3
+|ERR_CODE_SERIAL_COMMUNICATION_FAIL
+|NCP firmeware segmentation
+
+
+|4
+|ERR_CODE_RUN_NCP_UPDATE_FAIL
+|NCP update application segmentation
+
+|5
+|ERR_CODE_NCP_UPDATE_FIMRWARE_FAIL
+|Hardware bootloader pin fail; +
+Bootloader firmware segmentation
+
+|6
+|ERR_CODE_COMM_GOLDEN_SAMPLE_FAIL
+|RF fail
+
+|7
+|ERR_CODE_RF_FAIL
+|RF fail
+
+|8
+|ERR_CODE_MQTT_FAIL
+|MQTT connection fail;
+MQTT Broker not started
+
+|9
+|ERR_CODE_COMM_HUB_SERVICE_FAIL
+|Zigbee service segmentation;
+Hub service not started
+
+|===
+
+== *Tasks List*
+
+
+[%interactive]
+
+* [ ] NCP firmware image (2 versions).
+* [ ] Bootloader XMODEM firmware image.
+* [ ] Basic Zigbee service application has features: request/reply ncp info, "golden-sample" testing and collecting {RSSI, LQI}, MQTT connect, Hub 
+communication.
+* [ ] "Golden-sample" firmware image.
+* [ ] NCP update application.
+* [ ] Test this functional testing.

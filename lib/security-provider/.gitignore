@@ -1,0 +1,6 @@
+# ignore test
+authen_test
+security_test
+
+# object files
+*.o

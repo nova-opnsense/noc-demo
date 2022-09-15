@@ -1,0 +1,14 @@
+name: firmware-documents
+title: Firmware Documents
+version: 1.0.0
+start_page: ROOT:firmware_documents.adoc
+asciidoc:
+  extensions:
+    - asciidoctor-plantuml
+  attributes:
+    :plantuml-server-url: http://www.plantuml.com/plantuml
+    source-language: asciidoc@
+    table-caption: false
+
+nav:
+- modules/ROOT/nav.adoc

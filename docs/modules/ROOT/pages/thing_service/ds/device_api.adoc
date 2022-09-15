@@ -1,0 +1,265 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Device API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - Detection Service interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|14/02/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/device_model.adoc[]
+
+== *Thing Service - Detection Interface*
+
+=== *Device State Change*:
+
+==== *Message Interface*:
+
+*State Change Request*:
+
+- *Topic*: _ts/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.ds.device.state.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+- *Notes*: The endpoint state will contains only updated attributes.
+
+*State Change Notify*:
+
+- *Topic*: _ds/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ds.ts.device.state.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "DS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device List*:
+
+==== *Message Interface*:
+
+*Device List Request*:
+
+- *Topic*: _ts/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.ds.device.list.requested",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Device List Response*:
+
+- *Topic*: _ds/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ds.ts.device.list.responded",
+  "scope": "device",
+  "source": "ds",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "DS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+*Device List Notify*:
+
+- *Topic*: _ds/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ds.ts.device.list.updated",
+  "scope": "device",
+  "source": "ds",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "DS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+=== *Device Update*:
+
+==== *Message Interface*:
+
+*Device Update Request*:
+
+- *Topic*: _ts/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.ds.device.profile.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Device Update Notify*:
+
+- *Topic*: _ds/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ds.ts.device.profile.updated",
+  "scope": "device",
+  "source": "ds",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "DS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Detection Event*:
+
+==== *Message Interface*:
+
+*Notify Detection Event*:
+
+- *Topic*: _ds/event/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ds.ts.device.camera.detected",
+  "scope": "device",
+  "source": "ds",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "type": <int>, //detection types
+    "attributes": {
+      //detection infos
+    }
+  }
+}
+----

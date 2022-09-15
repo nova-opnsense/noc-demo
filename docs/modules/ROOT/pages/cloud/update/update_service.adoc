@@ -1,0 +1,387 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Update Service*
+:toc: left
+
+== *Overview*
+
+- API Structure.
+- Update Service APIs.
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|06/08/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *API Structure*
+
+=== *Request structure*
+
+- *Endpoint Url*: _https://UPDATE_SERVICE:PORT/PATH_
+- *Method*: GET, POST, PUT, DELETE (defined specifically for each API)
+- *Header*:
+
+|===
+|Key |Value
+
+|Content-Type
+|Defined specifically for each API: application/json, multipart/form-data
+
+|Authorization
+|Bearer JWT_TOKEN
+|===
+
+- *Body*: payloads defined specifically for each API
+
+=== *Response  structure*
+
+- *HTTP response status*: 200, success; otherwise, will fail
+
+|===
+|Status Code |Description
+
+|200
+|Success
+
+|400
+|Bad Request
+
+|401
+|Unauthorized
+
+|403
+|Forbidden
+
+|404
+|Not Found
+
+|500
+|Internal Server Error
+
+|503
+|Service Unavailable
+|===
+
+- *Body*:
+
+*Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"data": {
+		//defined specifically for each API
+	}
+}
+----
+
+*Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+== *Data Models*
+
+=== *Backup Model*
+[source,json]
+----
+{
+    "id": <string>,
+    "file": <file_model>,
+    "home_id": <string>,
+    "hub_id": <string>,
+    "created_date": <int>, // timestamp
+    "created_by": <string> // user_id
+}
+----
+
+=== *File Model*
+[source,json]
+----
+{
+    "url": <string>,
+    "name": <string>,
+    "size": <int>,
+    "extension": <string>,
+    "extra": {
+        "bucket_name": <string>,
+        "object_name": <string>
+    },
+    "content_type": <string>,
+}
+----
+
+== *APIs*
+
+=== *Create Backup*
+
+==== *Sequence*
+
+[plantuml,"create_backup_sequence",png]
+----
+@startuml
+autonumber
+RouterWeb -> UpdateService: Create Backup\n with AuthenInfo
+UpdateService -> UpdateService: Validate AuthenInfo
+alt authen case
+UpdateService -> RegisService: Validate User/Home Permission
+RegisService -> RegisService: Check Permission
+
+alt has-permission case
+RegisService --> UpdateService: Has Permission Response
+UpdateService -> MinIO: Upload Backup File
+MinIO --> UpdateService: Return MinIO's File Url
+UpdateService -> UpdateService: Store Backup
+UpdateService --> RouterWeb: Return Backup Response
+else no-permission case
+autonumber 5 1
+RegisService --> UpdateService: Return No-Permission Error
+UpdateService --> RouterWeb: Return No-Permission Error
+end
+
+else un-authen case
+autonumber 3 1
+UpdateService --> RouterWeb: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _POST_
+
+- *Header*:
+
+    Authorization: Bearer JWT_TOKEN
+    Content-Type: multipart/form-data; boundary=<string>
+
+- *Path*: _/api/backup/create_
+- *Parameters*:
+
+[cols="1,2", options="header"]
+|===
+|*Key*
+|*Data Type*
+
+|hub_id
+|String
+|===
+
+- *Form-Data*:
+
+[cols="1,2", options="header"]
+|===
+|*Key*
+|*Data Type*
+
+|file
+|File
+|===
+
+- *Sample*:
+[source,text]
+----
+POST /api/backup/create?hub_id=<hub_id> HTTP/1.1
+Host: <domain>
+Accept-Language: vi
+Authorization: Bearer <jwt_token>
+Content-Length: <size>
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.zip"
+Content-Type: application/zip
+
+(data)
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+----
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "id": <string> // backup id
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Backup Detail*
+
+==== *Sequence*
+
+[plantuml,"get_backup_details_sequence",png]
+----
+@startuml
+autonumber
+RouterWeb -> UpdateService: Get Backup Detail\n with AuthenInfo
+UpdateService -> UpdateService: Validate AuthenInfo
+alt authen case
+UpdateService -> UpdateService: Get Backup Detail
+UpdateService --> RouterWeb: Return Backup Detail
+else un-authen case
+autonumber 3 1
+UpdateService --> RouterWeb: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/backup/<backupId>/detail_
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        <backup_model>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Backup List*
+
+==== *Sequence*
+
+[plantuml,"get_backup_list_sequence",png]
+----
+@startuml
+autonumber
+RouterWeb -> UpdateService: Get Backup List\n with AuthenInfo
+UpdateService -> UpdateService: Validate AuthenInfo
+alt authen case
+UpdateService -> UpdateService: Get Backup List
+UpdateService --> RouterWeb: Return Backup List
+else un-authen case
+autonumber 3 1
+UpdateService --> RouterWeb: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/backup/list_
+
+- *Parameters*:
+
+[cols="1,2,3", options="header"]
+|===
+|*Key*
+|*Data Type*
+|*Required?*
+
+|page
+|Int (start with 0, default: 0)
+|N
+
+|size
+|Int (min: 1, default: 10)
+|N
+
+|hub_id
+|String
+|Y
+
+|home_id
+|String
+|N
+|===
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "content": [
+            <backup_model>,
+            <backup_model>
+        ],
+        "totalPages": <int>,
+        "totalElements": <int>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----

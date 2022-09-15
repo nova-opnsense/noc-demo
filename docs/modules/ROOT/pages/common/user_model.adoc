@@ -1,0 +1,65 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *User Model*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Permission Defines.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|12/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *Data Structure*
+
+=== *User Structure*:
+
+[source,json]
+----
+{
+  "id": <string>, //user_id, email address
+  "name": <string>, //user name
+  "phone": <string>,
+  "email": <string>,
+  "admin": <boolean>,
+  "active": <boolean>,
+  "cloud_access": <boolean>,
+  "permissions": [
+    "PERMISISON_1", //<string>
+    "PERMISISON_2",
+    "PERMISISON_3"
+  ],
+  "zone_access": [
+    "ZONE_1", //<string>
+    "ZONE_2"
+  ],
+  "attributes": {
+    //attribute infos
+  }
+}
+----
+
+== *Permission Defines*:
+
+----
+constexpr auto kAddSceneGranted = "ADD_SCENE_GRANTED";
+constexpr auto kJoinDeviceGranted = "JOIN_DEVICE_GRANTED";
+constexpr auto kAddScheduleGranted = "ADD_SCHEDULE_GRANTED";
+constexpr auto kCreateDeviceGranted = "CREATE_DEVICE_GRANTED";
+constexpr auto kSecurityModeGranted = "UPDATE_SECURITY_MODE_GRANTED";
+----

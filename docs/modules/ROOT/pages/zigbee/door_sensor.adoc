@@ -1,0 +1,171 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Door sensor*
+:toc: left
+
+:Date:      02/06/2022
+:pic:       Tung Nguyen
+:version:   0.1
+
+== *Overview*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|Protocol
+|Zigbee Green Power
+
+|{counter:feature}
+|Behavior
+|
+Commissioning: Bidirectional. +
+Report: Unidirectional.
+
+|{counter:feature}
+|SDK
+|Zigbee Gecko SDK (v4.0.2)
+
+|{counter:feature}
+|Hardware
+|Devkit BRD4182A
+
+|{counter:feature}
+|Devkit BRD4182A
+|
+PA01 = TCK +
+PA02 = TMS +
+PA05 = RXD +
+PA06 = TXD +
+PB00 = MAG SENSOR +
+PB01 = BUTTON +
+PB02 = VREF +
+PC04 = EXT POWER +
+PD02 = LED 
+
+|{counter:feature}
+|Product
+|
+PA01 = TCK +
+PA02 = TMS +
+PA03 = RXD +
+PA04 = TXD +
+PA05 = BUTTON +
+PB00 = VREF +
+PB01 = MAG SENSOR +
+PC01 = LED +
+PC04 = EXT POWER 
+
+|{counter:feature}
+|Current operation
+| EM0: When commissioning > 2uA +
+EM2: When commissioned = 2uA +
+EM4: When not commission < 1uA 
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Zigbee Door sensor
+
+|===
+
+== *Description*
+
+image::door_sensor/door_sensor_flowchart.svg[]
+[.text-center]
+Figure {counter:figure}. Flowchart
+
+
+
+=== *Device state*
+Device in two main state: Not commission and commissioned. 
+
+- Not commission: Device will goto sleep EM4, and wait button is pressing. If it
+is press and hold in 10s, it will start Green Power commission mode. In this 
+time, the Zigbee Gateway need go to commission mode too for adding this device.
+After 60s, if it is not in any network, the device will go back to EM4. 
+
+- In commissioned: Device will goto sleep EM2 and do 3 timer tasks and react 
+with the event of MAG_SENSOR and BUTTON when their state changed. +
++ Task 1 is send all status, after reboot or in commssioned state. +
++ Task 2 is periodic send baterry status after 1 hour or 5 minutes based on 
+baterry is ok or not. +
++ Task 3 is periodic send current status after 30 minutes. +
++ BUTTON is pressing and holding in 10s, it will decommission. +
++ MAG_SENSOR changed event: device will send status.
+
+
+=== *Commissioning*
+Using default implement of Green power stack in Gecko SDK (v4.0.2).
+
+=== *Code implement*
+
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Task*
+|*Description*
+
+|{counter:code_implement}
+|Git
+|Build in local (MacOS). +
+Depends: +
+App builder: git@bitbucket.org:novaintechs/app_builder.git +
+Geck-SDK: git@bitbucket.org:novaintechs/silabs_sdk.git +
+Code: git@bitbucket.org:novaintechs/tung_dev.git +
+Toolchain: git@bitbucket.org:novaintechs/iot_tools.git
+
+|{counter:code_implement}
+|Main
+|Custom main function
+
+|{counter:code_implement}
+|ADC
+|ADC with LDMA in EM2
+
+|{counter:code_implement}
+|BUTTON interrupt
+|works in both EM2, EM4
+
+|{counter:code_implement}
+|MAG_SENSOR interrupt
+|works in EM2
+
+|===
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Implemnt Basic Green Power door sensor.
+* [x] Bidirectional Commission and Decommission.
+* [x] Report status mechanism.
+* [x] Works with gateway and Home App.
+* [x] Save energy (works in EM2, EM4).
+* [ ] Test long term.
+* [ ] Implement bootloader.
+* [ ] Support read device not DevKit.
+* [ ] Support OTA (need research more).
+* [ ] Git server for build code.
+* [ ] Functional test.
+* [ ] Security on chip.

@@ -1,0 +1,920 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Service Gateway*
+:toc: left
+
+:Date:      02/06/2022
+:pic:       Tung Nguyen
+:version:   0.1
+
+== *Overview*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|Protocol
+|Zigbee 3.0
+
+|{counter:feature}
+|OS support
+|Linux, Openwrt, Raspbian
+
+|{counter:feature}
+|SDK
+|Zigbee Gecko SDK (v4.0.2)
+
+|{counter:feature}
+|Gateway
+|Nano, Raspberry, Neptune
+
+|{counter:feature}
+|NCP (network co-processor)
+|Devkit BRD4180A, SoC EFR32MG13P
+
+|{counter:feature}
+|End device
+|
+On off switch +
+Level switch +
+Color Switch (RGB, colortemp) +
+Plug +
+Siren (HA, Tuya) +
+Door lock (HA, GP) +
+Bypass (on off, level, color) +
+Door sensor +
+Motion sensor +
+Environment sensor +
+Light sensor +
+Power meter
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Zigbee.
+
+|===
+
+
+== *Device model*
+
+
+=== *Device structure*
+
+[source,json]
+----
+{
+  "id" : <string>,
+  "mac" : <string>,
+  "protocol" : <string>,
+  "nexthop_id" : <string>,
+  "is_sleepy" : <boolean>,
+  "infos" : {
+    <infos_1>,
+    <infos_2>
+  },
+  "name" : <string>,
+  "is_virtual" : <boolean>,
+  "status" : <int>,
+  "nwkid" : <int>,
+  "power_source" : <int>,
+  "end_points" : [
+    <end_point_1>,
+    <end_point_1>,
+  ],
+  "binding" : [
+    <binding_1>,
+    <binding_2>
+  ],
+  "grouping" : [
+    <grouping_1>,
+    <grouping_2>
+  ]
+}
+
+----
+
+=== *Infos structure*
+
+[source,json]
+----
+{
+  "manufacturer" :        <string>,
+  "manufacturerId" :      <string>,
+  "product_id" :          <string>,
+  "fw_version" :          <string>,
+  "commit_fw_version" :   <string>,
+  "hw_version" :          <string>,
+  "commit_hw_version" :   <string>,
+  "joined_time" :         <double> , // time in ms
+  "is_gpd" :              <boolean>
+}
+----
+
+=== *Endpoint structure*
+
+[source,json]
+----
+{
+  "id" : <string>,
+  "type" : <int>,
+  "name" : <string>>,
+  "is_controllable" : <boolean>,
+  "attributes" : {
+    <attribute_1>,
+    <attribute_2>
+  },
+  "cluster_list" : {
+    "in_clusterX" : <int>,
+    "out_clusterY" : <int>,
+    "profile_id" : <int>,
+    "zib_device_id" : <int>
+  },
+  "settings" : [ 
+    {
+      "name": <string>,
+      "value": <int>,
+      "min": <int>,
+      "max": <int>,
+      "step": <int>
+    }
+  ],
+  "user_pins" : [
+    {
+      "id":<string>,
+      "pin":<string>
+    }
+  ],
+  "binds" : [ 
+    {
+      "dest_device_id": <string>,
+      "dest_ep_id":<string>
+    }
+  ],
+  "groups" : [
+    {
+      "device_id": <string>,
+      "ep_id": <string>
+    }
+  ]
+}
+----
+
+=== *Grouping structure*
+
+[source,json]
+----
+{
+    "ep_id" : <string>,
+    "multicast_id" : <int>,
+    "group_id" : <string>
+}
+----
+
+
+=== *Binding structure*
+
+[source,json]
+----
+{
+    "bind_count" : <int>,
+    "bind_index" : <int>,
+    "source" : {
+      "eui" : <string>,
+      "device_id" : <string>,
+      "ep_id" : <string>
+    },
+    "cluster_id" : <int>,
+    "is_group" : <boolean>,
+    "multicast_id" : <int>,
+    "dest" : {
+      "eui" : <string>,
+      "device_id" : <string>,
+      "ep_id" : <string>,
+    }
+}
+----
+
+=== *Device Define*
+
+==== *Device Type*
+[%autowidth.stretch]
+[cols="1,1,1,1,3", options="header"]
+|===
+|*Model*
+|*Name*
+|*ID*
+|*Attribute mandatory*
+|*Attribute Setting*
+
+.6+|Be controlled
+|on_off_switch
+|1
+|"on_off.value"
+|"report_interval.xxx"
+
+|level_switch
+|2
+|
+"on_off.value" +
+"level.value"
+|"report_interval.xxx"
+
+|color_switch
+|3
+|
+"on_off.value" +
+"color.xxx"
+|
+"color_mode.xxx" +
+"color_temp_max_in_K.xxx" +
+"color_temp_min_in_K.xxx" +
+"report_interval.xxx"
+
+|plug
+|4
+|"on_off.value"
+|
+
+|door_lock
+|5
+|
+"door_lock.xxx" +
+"battery.xxx" +
+"notification.xxx" 
+|
+
+|siren
+|6
+|"on_off.xxx"
+|
+"alarm_style.xxx" +
+"alarm_volume.xxx" +
+"alarm_duration" 
+
+|||||
+
+
+.3+|Controller
+|on_off_bypass
+|101
+|"bypass.on_off"
+|
+
+|level_bypass
+|102
+|
+"bypass.on_off" +
+"bypass.level"
+|
+
+|color_bypass
+|103
+|
+"bypass.xxx" 
+|
+
+|||||
+
+.12+|Sensor
+|temperature
+|201
+|"temperature.xxx"
+|"report_interval.xxx"
+
+|humidity
+|202
+|"humidity.xxx"
+|"report_interval.xxx"
+
+|Illuminance
+|203
+|"illuminance.xxx"
+|"report_interval.xxx"
+
+|pm_25
+|204
+|"pm_25.xxx"
+|"report_interval.xxx"
+
+|smoke
+|205
+|"smoke.xxx"
+|"report_interval.xxx"
+
+|co
+|206
+|"co.xxx"
+|"report_interval.xxx"
+
+|co2
+|207
+|"co2.xxx"
+|"report_interval.xxx"
+
+|electric_report
+|208
+|
+"power_consumption.xxx" +
+"power.xxx"
+|"report_interval.xxx"
+
+|motion
+|209
+|"motion.xxx"
+|"report_interval.xxx"
+
+|door_sensor
+|210
+|"door_sensor.xxx"
+|"report_interval.xxx"
+
+|battery
+|211
+|"battery.xxx"
+|
+
+|environment_sensor
+|212
+|
+"temperature.xxx" +
+"humidity.xxx"
+|"report_interval.xxx"
+
+
+|===
+
+
+==== *Attributes*
+
+[%autowidth.stretch]
+[cols="1,1,1,1,1,3", options="header"]
+|===
+|*STT*
+|*Name*
+|*Sub-Attribute*
+|*Type*
+|*Is controllable*
+|*Description*
+
+|{counter:attr}
+|on_off
+|value
+|boolean
+|true
+|
+true: on +
+false: off
+
+|{counter:attr}
+|level
+|value
+|int
+|true
+|1-99 (%)
+
+|{counter:attr}
+.4+|color
+|hue
+|int
+|true
+|0-99 (%)
+
+|{counter:attr}
+|saturation
+|int
+|true
+|0-99 (%)
+
+|{counter:attr}
+|color_temperature
+|int
+|true
+|3000-6000 (kelvin)
+
+|{counter:attr}
+|level
+|int
+|true
+|1-99 (%)
+
+|{counter:attr}
+.7+|door_lock
+|locked
+|boolean
+|true
+|
+true: locked +
+false: unlocked
+
+|{counter:attr}
+|event
+|int
+|false
+|Reference "Door Lock event"
+
+|{counter:attr}
+|user_id
+|int
+|true
+|
+
+|{counter:attr}
+|user_id_status
+|int
+|false
+|
+0 = available +
+1 = occupied
+
+|{counter:attr}
+|pin_code
+|string
+|true
+|Default: ""
+
+|{counter:attr}
+|max_user
+|int
+|false
+|
+
+|{counter:attr}
+|Command
+|int
+|true
+|command: +
+CLEAR_ALL_PIN_CODE = 0x01, +
+SET_PIN_CODE = 0x02, // need user_id, pin_code +
+GET_PIN_CODE = 0x03, // need user_id +
+CLEAR_PIN_CODE = 0x04 // need user_id +
+
+
+|{counter:attr}
+.3+|notification
+|tamper
+|int
+|true
+|
+0 = okie +
+1 = tamper_detected
+
+|{counter:attr}
+|issue
+|int
+|true
+|
+0 = okie, +
+1 = RESET_TO_FACTORY_DEFAULTS +
+2 = RF_MODULE_POWER_CYCLED +
+3 = FORCED_DOOR_OPEN, (doorlock) +
+4 = DOOR_AJAR, (doorlock) +
+5 = COERCED, (doorlock) +
+
+|{counter:attr}
+|jam
+|int
+|true
+|
+0 = okie +
+1 = jam_detected
+
+|{counter:attr}
+.5+|bypass
+|on_off
+|boolean
+|false
+|
+true: on +
+false: off
+
+|{counter:attr}
+|level
+|int
+|false
+|1-99 (%)
+
+|{counter:attr}
+|hue
+|int
+|false
+|0-99 (%)
+
+|{counter:attr}
+|saturation
+|int
+|false
+|0-99 (%)
+
+|{counter:attr}
+|color_temperature
+|int
+|false
+|3000-6000 (Kelvin)
+
+|{counter:attr}
+|motion
+|value
+|int
+|false
+|
+0 = idle +
+1 = motion_detected
+
+
+|{counter:attr}
+|door_sensor
+|value
+|int
+|false
+|
+0 = closed +
+1 = opened
+
+|{counter:attr}
+|smoke
+|value
+|int
+|false
+|
+0 = okie +
+1 = smoke detected
+
+|{counter:attr}
+|ac_status
+|value
+|int
+|false
+|
+0 = AC unplugged +
+1 = AC plugged in
+
+
+|{counter:attr}
+.5+|battery
+|status
+|int
+|false
+|
+0 = okie +
+1 = out of battery
+
+|{counter:attr}
+|percent
+|int
+|false
+|0-100 (%)
+
+|{counter:attr}
+|percent_threshold
+|int
+|false
+|
+
+|{counter:attr}
+|voltage
+|int
+|false
+|unit: 100mV, Example: 11 -> 1100mV
+
+|{counter:attr}
+|voltage_threshold
+|int
+|false
+|
+
+|{counter:attr}
+.2+|temperature
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|CEL, FAHR (Celsius, Fahrenheit)
+
+|{counter:attr}
+.2+|humidity
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|CENT, ABS (Percentage, g/m3)
+
+|{counter:attr}
+.2+|illuminance
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|CENT, LX (Percentage, Lux)
+
+
+|{counter:attr}
+.2+|pm_25
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|co
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|co2
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|power_consumption
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|power
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|voltage
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+
+|{counter:attr}
+.2+|current
+|value
+|float
+|false
+|
+
+|{counter:attr}
+|unit
+|string
+|false
+|
+
+|===
+
+==== *Door lock event*
+
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+| *LOCK_EVT_XXX*         | *Value*  | *Description*
+| LOCK_EVT_MANUAL_LCK	        |1	|   Manual lock operation
+|LOCK_EVT_MANUAL_ULCK	        |2	|   Manual unlock operation
+|LOCK_EVT_RF_LCK	            |3	|   RF lock operation
+|LOCK_EVT_RF_ULCK	            |4	|   RF unlock operation
+|LOCK_EVT_KEYPAD_LCK	        |5	|   Keypad lock operation with user identifier info
+|LOCK_EVT_KEYPAD_ULCK	        |6	|   Keypad unlock operation with user identifier info
+|LOCK_EVT_MANUAL_NOT_FUL_LCK	|7	|   Manual not fully locked operation
+|LOCK_EVT_RF_NOT_FUL_LCK	    |8	|   RF not fully locked operation
+|LOCK_EVT_AUTO_LCK	            |9	|   Auto lock locked operation
+|LOCK_EVT_AUTO_NOT_FUL_OPER	    |10|	Auto lock not fully operation
+|LOCK_EVT_ALL_CODE_DEL	        |11|	All user codes deleted
+|LOCK_EVT_1_CODE_DEL	        |12|	Single user code deleted
+|LOCK_EVT_CODE_ADDED	        |13|	New user code added
+|LOCK_EVT_CODE_DUP	            |14|	New user code not added due to duplicate code
+|LOCK_EVT_KEYPAD_DISABLED	    |15|	Keypad temporary disabled
+|LOCK_EVT_KEYPAD_BUSY	        |16|	Keypad busy
+|LOCK_EVT_NEW_PROG_CODE	        |17|	New program code entered - unique code for lock configuration
+|LOCK_EVT_USR_CODE_LIMIT	    |18|	Manually enter user access code exceeds code limit
+|LOCK_EVT_RF_ULCK_INVLD_CODE	|19|	Unlock by RF with invalid user code
+|LOCK_EVT_RF_LCK_INVLD_CODE	    |20|	Locked by RF with invalid user code
+|LOCK_EVT_BIOMETRIC_LCK	        |101|	Zigbee Add: lock by fingerprint
+|LOCK_EVT_BIOMETRIC_ULCK	    |102|	Zigbee Add : unlock by fingerprint
+|===
+
+
+==== *Device status*
+
+[source,c]
+----
+typedef enum 
+{
+    STATUS_ALIVE = 0, /* JOINING SUCCESS */
+    STATUS_DOWN = BIT(0), /* = 1*/
+    STATUS_IS_UPDATING_OTA = BIT(1),
+    STATUS_IS_JOINING = BIT(2), /* MEAN REQUEST ACTIVE ENDPOINT */
+    STATUS_IS_WAITING_ACTIVE_ENDPOINT_RESPONSE = BIT(3), 
+    STATUS_IS_REQUEST_SIMPLE_DESCRIPTION = BIT(4),
+    STATUS_IS_WAITING_SIMPLE_DESCRIPTION_RESPONSE = BIT(5),
+    STATUS_IS_REQUEST_NODE_DESCRIPTION = BIT(6),
+    STATUS_IS_WAITING_NODE_DESCRIPTION_RESPONSE = BIT(7),
+    STATUS_IS_NEED_EUI64 = BIT(8),
+    STATUS_IS_GET_EUI64 = BIT(9),
+
+    STATUS_IS_NEED_LEAVING = BIT(10),
+    STATUS_IS_REQUESTING_DEVICE_ID = BIT(11),
+    STATUS_IS_NEED_HEALTH_CHECK = BIT(12),
+    STATUS_IS_PENDING_JOINING = BIT(13),
+} src_device_status_e;
+----
+
+==== *Power source*
+
+[source,c]
+----
+typedef enum 
+{
+    POWER_SOURCE_AC = 0, /* default */
+    POWER_SOURCE_BATTERRY = 1,
+} src_power_source_e;
+----
+
+== *Service API*
+
+Reference in Software Documents -> Thing Service -> Hub Service -> Device API +
+"4. Thing Service - Hub Service interface"
+
+== *Binding Group API*
+
+Reference in Software Documents -> 
+
+== *Binding task*
+
+image::gateway/bind_task.svg[]
+[.text-center]
+Figure {counter:figure}. Binding task.
+
+
+== *Grouping task*
+=== *Main task*
+image::gateway/group_task.svg[]
+[.text-center]
+Figure {counter:figure}. Grouping task.
+
+=== *Add device to group task*
+image::gateway/Add_device_to_group.svg[align="center",260]
+[.text-center]
+Figure {counter:figure}. Add device to Group task.
+
+=== *Add device to group task*
+image::gateway/remove_device_in_group.svg[align="center",260]
+[.text-center]
+Figure {counter:figure}. Remove device in Group task.
+
+== *Sync task*
+=== *Bypass control command received*
+image::gateway/SYNC_1.svg[align="center",640]
+[.text-center]
+Figure {counter:figure}. Sync task when received bypass control.
+
+=== *App control*
+image::gateway/SYNC_2.svg[align="center",420]
+[.text-center]
+Figure {counter:figure}. Sync task when received Home App control.
+
+=== *Device report*
+image::gateway/SYNC_3.svg[align="center",420]
+[.text-center]
+Figure {counter:figure}. Sync task when received device report.
+
+== *Green Power task*
+=== *Green Power joining*
+
+image::gateway/GP_JOIN.svg[align="center",640]
+[.text-center]
+Figure {counter:figure}. Green Power event: GW and Device commission.
+
+=== *Green Power leaving*
+
+image::gateway/GP_LEAVE.svg[align="center",420]
+[.text-center]
+Figure {counter:figure}. Green Power event: Device decommission.
+
+=== *Green Power init*
+
+image::gateway/GP_INIT.svg[align="center",360]
+[.text-center]
+Figure {counter:figure}. Green Power Init after service started.
+
+== *Supported Devices*
+=== *Light*
+- Philip HUE
+
+=== *Switch, Relay, Plug*
+- Xiaomi: Switch, Relay, Plug.
+
+=== *Siren*
+- Climax siren
+
+- Xiaomi siren (Tuya)
+
+=== *Door lock*
+- Yale
+
+=== *Sensor*
+- Door sensor (NIT - Green power)
+
+- Climax: Light sensor, door sensor, Power meter.
+
+- Xiaomi: Environment sensor, Door sensor, Smoke sensor.
+
+
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Implemnt Basic gateway service.
+* [x] Support binding, grouping.
+* [x] Works with Green power profile.
+* [x] Works with End device, Home App (TS), WebUI.
+* [ ] Mesh test.
+* [ ] Green Power: Need test with full mesh and GP Proxy devices.
+* [ ] Test long term.
+* [ ] Security NCP.
+* [ ] Implement bootloader NCP.
+* [ ] Support Backup, Restore, Replace.
+* [ ] Support OTA (need research more).
+* [ ] Support Fragmentation (IRC Device).
+* [ ] Health check.
+* [ ] Logging.
+* [ ] Network Topology.

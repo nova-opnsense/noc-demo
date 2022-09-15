@@ -1,0 +1,295 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Device API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Server - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|09/04/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/device_model.adoc[]
+
+== *Thing Server - App interface*
+
+=== *Create Virtual Device*:
+
+==== *Message Interface*:
+
+*Create Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.device.virtual.created",
+  "scope": "device",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+- *Notes*: The *id* field in the new virtual device should be an empty string.
+
+*Create Response*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.device.virtual.created",
+  "scope": "device",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Subject*: _cs.event.APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.error.responded",
+  "scope": "device",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "code": <int>,
+    "message": <string>
+  }
+}
+----
+
+=== *Device State*:
+
+==== *Message Interface*:
+
+*Device State Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.device.state.updated",
+  "scope": "device",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    devices:[
+      <device_structure>,
+      <device_structure>,
+      <device_structure>
+    ]
+  }
+}
+----
+
+- *Notes*: The endpoint state will contains only updated attributes.
+
+*Device State Notify*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.device.state.updated",
+  "scope": "device",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device Update*:
+
+==== *Message Interface*:
+
+*Profile Update Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.device.profile.updated",
+  "scope": "device",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Profile Update Notify*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.device.profile.updated",
+  "scope": "device",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device List*:
+
+==== *Message Interface*:
+
+*Device List Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.device.list.requested",
+  "scope": "device",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "limit": <int>,
+    "offset": <int>
+  }
+}
+----
+
+*Device List Response*:
+
+- *Subject*: _cs.event.APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.device.profile.updated",
+  "scope": "device",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "limit": <int>,
+    "offset": <int>,
+    "devices": [
+      <device_structure>,
+      <device_structure>,
+      <device_structure>
+    ]
+  }
+}
+----

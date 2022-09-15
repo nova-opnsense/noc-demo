@@ -1,0 +1,277 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Hub System Design*
+:toc: left
+
+== *Overview*
+- Single mode design.
+- Multiple mode design.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|24/01/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|28/01/2022
+|Nga Le
+|1.1
+|Add multiple mode design.
+
+|16/05/2022
+|Nga Le
+|1.2
+|Update diagrams and descriptions.
+
+|===
+
+== *System Design*
+
+=== *Single Mode*:
+
+==== *System Diagram*:
+
+[plantuml, "single_hub", png]
+----
+@startuml
+title: NIT Hub (Single Hub)
+
+left to right direction
+
+node "Main Hub" {
+  node "MQTT Broker" {
+    [Public Listener] <<0.0.0.0:8883>> as public
+    [Private Listener] <<127.0.0.1:1883>> as private
+    [Authen Library] <<shared lib>> as alib
+
+    private <.left.> public
+  }
+
+  node "SW Apps" {
+    [Thing Service] <<mqtt>> as ts
+    [Authen Service] <<https>> as auth
+  }
+
+  node "FW Apps" {
+    [Hub Service] <<mqtt>> as hub
+    [ZWave Service] <<mqtt>> as zw
+    [ZigBee Service] <<mqtt>> as zb
+  }
+
+  ts -down-> auth
+  ts -right-> private
+  alib --right-> auth
+  public -down-> alib
+
+  zw -down-> private
+  zb -down-> private
+  hub --down-> private
+  hub --down-> auth
+}
+
+node "Applications" {
+  [Tablet App] <<mqtt>> as tab
+
+  tab ---> public
+}
+@enduml
+----
+
+==== *System Descriptions*:
+
+. *MQTT Broker*:
+
+.. *Private Listener*:
+... Only local services can connect to this port.
+... The broker will listen on loopback interface which could not access via LAN or WAN interface.
+
+.. *Public Listener*:
+... External services have to connect to MQTT broker on this port.
+... The broker will configure to listen on loopback, LAN, and WAN interface.
+... The external services will need to authen via Authen Service (AS) before connecting to this port.
+
+. *Service Authentication*:
+.. The Authen Service will generate id/secret for external services to connect to public port on MQTT broker.
+.. The Authen Service also issue access token for Hub Service, Mobile Apps,... to communicate with Thing Service.
+
+=== *Multiple Mode*:
+
+==== *Thing Service run on Main Hub*:
+
+[plantuml, "single_segment", png]
+----
+@startuml
+title: NIT Hub (Single Segment)
+
+left to right direction
+
+node "Main Hub" {
+  node "MQTT Broker" {
+    [Public Listener] <<0.0.0.0:8883>> as public
+    [Private Listener] <<127.0.0.1:1884>> as private
+
+    private <.left.> public
+  }
+
+  node "SW Apps" {
+    [Thing Service] <<mqtt>> as ts
+    [Authen Service] <<https>> as as
+  }
+
+  node "FW Apps" {
+    [Hub Service] <<mqtt>> as hub
+    [ZWave Service] <<mqtt>> as zw
+    [ZigBee Service] <<mqtt>> as zb
+  }
+
+  ts -left-> as
+  ts -up-> private
+  public -down-> as
+  zw -down-> private
+  zb -down-> private
+  hub -down-> private
+}
+
+node "Sub Hub" as sub1 {
+  node "FW Apps" as fw1 {
+    [Hub Service] <<mqtt>> as hub1
+    [Zigbee Service] <<mqtt>> as zb1
+    [ZWave Service] <<mqtt>> as zw1
+  }
+
+  node "MQTT Broker" as broker1 {
+    [Bridge Connect] << forward >> as bridge1
+    [Private Listener] <<127.0.0.1:1883>> as private1
+
+    private1 .right.> bridge1
+  }
+
+  zb1 -down-> private1
+  zw1 -down-> private1
+  hub1 -down-> private1
+  bridge1 -down-> public
+}
+
+node "Sub Hub" as sub2 {
+  node "MQTT Broker" as broker2 {
+    [Bridge Connect] <<forward>> as bridge2
+    [Private Listener] <<127.0.0.1:1883>> as private2
+
+    private2 .right.> bridge2
+  }
+
+  node "FW Apps" as fw2 {
+    [Hub Service] <<mqtt>> as hub2
+    [Zigbee Service] <<mqtt>> as zb2
+    [ZWave Service] <<mqtt>> as zw2
+  }
+
+  zb2 -up-> private2
+  zw2 -up-> private2
+  hub2 -up-> private2
+  bridge2 -up-> public
+}
+@enduml
+----
+
+- *Notes*: In this system, the public listener of MQTT broker on *Sub Hub* is not enabled. A *Bridge Connect* setting will be enabled to forward all topics to main broker.
+
+==== *Thing Service run on Brain Hub*:
+
+[plantuml, "single_segment_with_brain_hub", png]
+----
+@startuml
+title: NIT Hub (Single Segment with Brain Hub)
+
+left to right direction
+
+node "Main Hub" {
+  node "MQTT Broker" {
+    [Public Listener] <<0.0.0.0:8883>> as public
+    [Private Listener] <<127.0.0.1:1883>> as private
+
+    private <.left.> public
+  }
+
+  node "SW Apps" {
+    [Thing Service] <<mqtt>> as ts
+    [Authen Service] <<https>> as as
+  }
+
+  node "FW Apps" {
+    [Hub Service] <<mqtt>> as hub
+    [ZWave Service] <<mqtt>> as zw
+    [ZigBee Service] <<mqtt>> as zb
+  }
+
+
+  ts -left-> as
+  ts -up-> private
+  public -down-> as
+  zw -down-> private
+  zb -down-> private
+  hub -down-> private
+}
+
+node "Sub Hub" as sub1 {
+  node "FW Apps" as fw1 {
+    [Hub Service] <<mqtt>> as hub1
+    [Zigbee Service] <<mqtt>> as zb1
+    [ZWave Service] <<mqtt>> as zw1
+  }
+
+  node "MQTT Broker" as broker1 {
+    [Bridge Connect] <<forward>> as bridge1
+    [Private Listener] <<127.0.0.1:1883>> as private1
+
+    private1 .right.> bridge1
+  }
+
+  zb1 -down-> private1
+  zw1 -down-> private1
+  hub1 -down-> private1
+  bridge1 --down-> public
+}
+
+node "Sub Hub" as sub2 {
+  node "MQTT Broker" as broker2 {
+    [Bridge Connect] <<forward>> as bridge2
+    [Private Listener] <<127.0.0.1:1883>> as private2
+
+    private2 .right.> bridge2
+  }
+
+  node "FW Apps" as fw2 {
+    [Hub Service] <<mqtt>> as hub2
+    [Zigbee Service] <<mqtt>> as zb2
+    [ZWave Service] <<mqtt>> as zw2
+  }
+
+  zb2 -up-> private2
+  zw2 -up-> private2
+  hub2 -up-> private2
+  bridge2 -up-> public
+}
+
+node "Brain Hub" {
+  node "AI Apps" {
+    [Voice Service] <<mqtt>> as vs
+    [Detection Service] <<mqtt>> as ds
+  }
+
+  vs -down-> public
+  ds -down-> public
+}
+@enduml
+----

@@ -1,0 +1,381 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Automation API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|18/05/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/automation_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Automation Info*:
+
+==== *Message Interface*:
+
+*Automation Info Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.automation.info.requested",
+  "scope": "automation",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "automation_id": <string>
+  }
+}
+----
+
+*Automation Info Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.automation.info.responded",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+=== *Automation List*:
+
+==== *Message Interface*:
+
+*Automation List Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.automation.list.requested",
+  "scope": "automation",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Automation List Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.automation.list.responded",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "automations": [
+      <automation_structure>,
+      <automation_structure>,
+      <automation_structure>
+    ]
+  }
+}
+----
+
+=== *Create Automation*:
+
+==== *Message Interface*:
+
+*Request Create Automation*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.automation.created",
+  "scope": "automation",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Create Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.automation.created",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Update Automation*:
+
+==== *Message Interface*:
+
+*Request Update Automation*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.automation.updated",
+  "scope": "automation",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Update Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.automation.updated",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+
+=== *Delete Automation*:
+
+==== *Message Interface*:
+
+*Request Delete Automation*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.automation.deleted",
+  "scope": "automation",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Delete Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.automation.deleted",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <automation_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "automation",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

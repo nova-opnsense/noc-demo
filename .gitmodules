@@ -1,0 +1,9 @@
+[submodule "docs"]
+	path = docs
+	url = git@bitbucket.org:novaintechs/fw-docs.git
+[submodule "lib/security-provider"]
+	path = lib/security-provider
+	url = git@bitbucket.org:novaintechs/security-provider.git
+[submodule "lib/mdns"]
+	path = lib/mdns
+	url = https://github.com/mjansson/mdns.git

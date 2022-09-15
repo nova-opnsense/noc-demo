@@ -1,0 +1,332 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Zone API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|17/03/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/zone_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Zone List*:
+
+==== *Message Interface*:
+
+*Zone List Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.zone.list.requested",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Zone List Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.zone.list.responded",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "zones": [
+      <zone_structure>,
+      <zone_structure>,
+      <zone_structure>
+    ]
+  }
+}
+----
+
+=== *Create Zone*:
+
+==== *Message Interface*:
+
+*Request Create Zone*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.zone.created",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Create Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.zone.created",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Update Zone*:
+
+==== *Message Interface*:
+
+*Request Update Zone*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.zone.updated",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Update Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.zone.updated",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+
+=== *Delete Zone*:
+
+==== *Message Interface*:
+
+*Request Delete Zone*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.zone.deleted",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Delete Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.zone.deleted",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "zone",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

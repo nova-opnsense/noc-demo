@@ -1,0 +1,257 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Routes*
+:toc: left
+
+:Date:      01/07/2022
+:pic:       Tho Do
+:version:   0.1
+
+== *Overview*
+Route feature for create packet path from internal to external and feedback.
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Initial Docs
+
+|===
+
+
+== *Data model*
+
+
+=== Route structure
+
+[source,json]
+----
+{
+    "id": <string>,
+    "interface": <string>,
+    "ip_mask": <string>,
+    "target_ip": <string>,
+    "name": <string>
+}
+----
+
+=== Route List structure
+
+[source,json]
+----
+{
+    "route_list": <route_t[]>,
+    "nb_routes": <int>
+}
+----
+
+== *API*
+=== *Creat Route*
+==== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.network.static.routes.created",
+    "source":"hub",
+    "data": [
+        {
+        "ip_mask":"192.168.4.0/24",
+        "target_ip":"192.168.3.98",
+        "name":"example2",
+        "interface":"eth0"
+        }
+    ]
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.network.static.routes.created",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "ip_mask":"192.168.4.0/24",
+                "target_ip":"192.168.3.98",
+                "name":"example2",
+                "interface":"eth0"
+            }
+        ]
+    }
+}
+----
+=== *Request Route*
+==== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.network.static.routes.requested",
+    "source":"hub",
+    "data": {}
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.network.static.routes.responded",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "ip_mask":"192.168.4.0/24",
+                "target_ip":"192.168.3.98",
+                "name":"example2",
+                "interface":"eth0"
+            }
+        ]
+    }
+}
+----
+=== *Update Route*
+==== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.network.static.routes.updated",
+    "source":"hub",
+    "data": [
+        {
+        "ip_mask":"192.168.4.0/24",
+        "target_ip":"192.168.3.98",
+        "name":"example2",
+        "interface":"eth0"
+        }
+    ]
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.network.static.routes.updated",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "ip_mask":"192.168.4.0/24",
+                "target_ip":"192.168.3.98",
+                "name":"example2",
+                "interface":"eth0"
+            }
+        ]
+    }
+}
+----
+=== *Delete Route*
+==== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.network.static.routes.deleted",
+    "source":"hub",
+    "data": [
+        {
+        "id" : ""
+        }
+    ]
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.network.static.routes.deleted",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "id" : "123",
+                "ip_mask":"192.168.4.0/24",
+                "target_ip":"192.168.3.98",
+                "name":"example2",
+                "interface":"eth0"
+            }
+        ]
+    }
+}
+----
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|100001
+|Unknown
+
+|100002
+|Setting Failed
+
+|100003
+|Interface Convert failed
+
+|100004
+|Internal Server Error
+
+|100005
+|Unauthorized
+
+|100006
+|ID Mismatched
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] API Define.
+* [ ] LAN Process.
+

@@ -1,0 +1,31 @@
+{
+    "dns":  {
+            "custom_hostname":  [
+                    {
+                            "name": "Authenticate",
+                            "domain":       "auth.nova",
+                            "ip":   "192.168.124.1"
+                    }, 
+                    {
+                            "name": "Cap",
+                            "domain":       "cap.nova",
+                            "ip":   "192.168.124.1"
+                    }
+            ],
+            "additional_dns":       ["8.8.8.8", "8.8.4.4"],
+            "forwarding_dns_enabled":       false
+    },
+    "dhcp4":        {
+            "start_ip":     "192.168.124.5",
+            "pools":        100,
+            "relay_enabled":        false,
+            "relay_server_address": "192.168.1.1",
+            "relay_local_address":  "192.168.124.1",
+            "static_dhcp4_clients": [{
+                            "timestamp":    0,
+                            "mac":  "aa:bb:cc:dd:ee:ff",
+                            "ip":   "192.168.34.199",
+                            "host_name":    "sample"
+                    }]
+    }
+}

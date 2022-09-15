@@ -1,0 +1,187 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *NIT Cloud Architect*
+:toc: left
+
+== *Overview*
+- Nova Intelligence Technologies Cloud.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|21/01/2022
+|Nga le
+|1.0
+|Initial cloud architect.
+
+|22/01/2022
+|Nga le
+|1.1
+|Add component descriptions and technology stacks.
+
+|18/04/2022
+|Nga le
+|1.2
+|Update databases and open source stacks.
+
+|===
+
+== *Description*
+. The document will includes:
+.. Cloud architect design.
+.. Description for cloud components.
+.. Introduce highlight technologies/frameworks.
+
+== *NIT Cloud Architect*
+
+. The below diagram will include all components of NIT cloud.
+
+[plantuml, "component", png]
+----
+@startuml
+title: NIT Cloud
+
+left to right direction
+
+node "Web Apps" as apps {
+  [CMC App] as cmc
+  [Other Apps...] as other
+}
+
+node "Identity Access Management" as iam {
+  [API Gateway] <<load balance>> as gateway
+
+  node "IAM Instances" {
+    [Service Instance 1] <<keycloak>> as iden1
+    [Service Instance 2] <<keycloak>> as iden2
+    [Service Instance ...] <<keycloak>> as iden3
+  }
+
+  database "PostgreSQL" {
+    [Indentity DB] as db
+  }
+
+  iden1 -d-> db
+  iden2 .d.> db
+  iden3 .d.> db
+
+  gateway -d-> iden1
+  gateway .d.> iden2
+  gateway .d.> iden3
+}
+
+node "Message Servers" as msgs {
+  component "Broker Instance" {
+    [NATS server]
+  }
+
+  component "Broker Instance..." {
+  }
+}
+
+node "Core Services" as core {
+  [Noti Service] as noti
+  [Regis Service] as regis
+  [Event Service] as event
+  [Update Service] as us
+
+  database "Storage Service" as storage {
+    [File Storage] as file
+  }
+
+  database "MariaDB" as crds {
+    [Core DB] as cdb
+  }
+
+  us -d-> file
+  us -d-> cdb
+  noti -d-> cdb
+  regis -d-> cdb
+  event -d-> cdb
+  regis -d-> file
+}
+
+cmc -d-> gateway
+other -d-> gateway
+core -d-> gateway
+apps -r-> core
+msgs -d-> core
+@enduml
+----
+
+== *Cloud Components*
+
+=== *Web Apps*
+
+. Customer Management Center Application. 
+
+.. Feature TBD
+
+=== *Identity Access Management*
+
+. Identity Service:
+.. User log in and registration.
+.. Profile and account management.
+.. Account verification and recovery.
+.. Support multi factor authentication.
+
+. Relational Database Service
+.. Store identity and permisison information.
+
+=== *Message Servers*
+
+. Broker Instance
+
+.. NATS Server
+... Message oriented middle.
+... Distributed and scalable message broker.
+
+.. Bridge Service
+... Collect message and forward to core services.
+
+
+=== *Core Services*
+
+. Regis Service
+.. Handling registration home, user, and other information.
+
+. Event Service
+.. Handling event message which received from bridge service.
+.. Data inteligence and data lake will be integrated with this component.
+
+. Noti Service
+.. Processing notifications and alerts from home to user.
+
+. Update Service
+.. Support creating update rollouts and store package versions.
+
+. Storage Service
+.. Storing backup files and configurations.
+
+. Relational Database Service
+.. Store all informations from regis, event, and notification.
+
+== *Technology Stacks*
+
+. Identity Management:
+.. KeyCloak: https://www.keycloak.org/guides
+
+. Message Broker:
+.. NATS: https://docs.nats.io/nats-concepts/what-is-nats
+
+. Relational Database:
+.. MariaDB: https://mariadb.org
+.. PostgreSQL: https://www.postgresql.org
+
+. Storage Service:
+.. MinIO: https://docs.min.io/minio/baremetal/
+

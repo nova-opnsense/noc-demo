@@ -1,0 +1,422 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Device Model*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Device Enums.
+- Device Attributes.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|12/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *Data Structure*
+
+=== *Device Structure*:
+
+[source,json]
+----
+{
+  "id": <string>,
+  "name":<string>,
+  "status": <int>,
+  "mac": <string>,
+  "position": <int>,
+  "zone_id": <string>,
+  "home_id": <string>,
+  "protocol": <string>,
+  "power_source": <int>,
+  "virtual_type": <int>,
+  "hardware_type": <int>,
+  "controller_id": <string>,
+  "profiles": {
+    "KEY": VALUE, //any primitive types and string
+  },
+  "end_points": [
+    <end_point_1>,
+    <end_point_2>
+  ],
+  "grouping": [
+    <group_1>,
+    <group_2>
+  ]
+}
+----
+
+=== *Endpoint Structure*:
+
+[source,json]
+----
+{
+  "id": <string>,
+  "type": <int>,
+  "name": <string>,
+  "is_controllable": <boolean>,
+  "attributes": {
+    "KEY": VALUE, //any primitive types and string
+  },
+  "settings":[
+    <setting_1>,
+    <setting_2>
+  ],
+  "user_pins": [
+    <user_pin_1>,
+    <user_pin_2>
+  ],
+  "groups": [
+    <group_id_1>,
+    <group_id_2>
+  ],
+  "binds":[
+    {
+      "dest_device_id": <string>,
+      "dest_ep_id":<string>
+    }
+  ]
+}
+----
+
+=== *Group Structure*:
+
+[source,json]
+----
+{
+  "device_id": <string>, 
+  "ep_id": <string>
+}
+----
+
+=== *Setting Structure*:
+
+[source,json]
+----
+{
+  "name": <string>,
+  "value": <int>,
+  "min": <int>,
+  "max": <int>,
+  "step": <int>
+}
+----
+
+=== *User Pincode Structure*:
+
+[source,json]
+----
+{
+  "id":<string>,
+  "pin":<string>
+}
+----
+
+=== *Device Enums*:
+
+==== *Device Status*:
+----
+OK = 0,
+Error = 1
+----
+
+==== *Power Source*:
+----
+AC = 0,
+Battery = 1
+----
+
+==== *Virtual Types*:
+----
+None = 0, //no virtual
+Firmware = 1, //firmware virtual device
+Software = 2, //software virtual device
+----
+
+==== *Hardware Types*:
+----
+Device = 0, //end device
+Hub = 1,    //hub service
+AIBox = 2,  //detection service
+----
+
+==== *Endpoint Types*:
+----
+Unknown = 0,
+
+//control
+OnOffSwitch = 1,
+LevelSwitch = 2,
+ColorSwitch = 3,
+Plug = 4,
+DoorLock = 5,
+Siren = 6,
+
+//bypass
+OnOffByPass = 101,
+LevelByPass = 102,
+ColorByPass = 102,
+
+//sensor
+TemperatureSensor = 201,
+HumiditySensor = 202,
+IlluminanceSensor = 203,
+Pm25Sensor = 204,
+SmokeSensor = 205,
+CoSensor = 206,
+Co2Sensor = 207,
+ElectricSensor = 208,
+MotionSensor = 209,
+DoorSensor = 210,
+BatterySenspr = 211,
+EnvironmentSensor = 212,
+
+//detection types
+Camera = 1001,
+DoorBell = 1002,
+
+//software types
+----
+
+=== *Device Attributes*:
+
+==== *On Off*:
+
+[source,json]
+----
+{
+  "on_off.value": <boolean> //true = on, false = off
+}
+----
+
+==== *Level*:
+
+[source,json]
+----
+{
+  "level.value": <int> //1-99%
+}
+----
+
+==== *Color*:
+
+[source,json]
+----
+{
+  "color.hue": <int>, //0-99%
+  "color.level": <int>, //1-99%
+  "color.saturation": <int>, //0-99%
+  "color.color_temperature": <int>, //3000-6000
+}
+----
+
+==== *Door Lock*:
+
+[source,json]
+----
+{
+  "door_lock.event": <int>,
+  "door_lock.user_id": <int>,
+  "door_lock.command": <int>,
+  "door_lock.max_user": <int>,
+  "door_lock.locked": <boolean>,
+  "door_lock.pin_code": <string>,
+  "door_lock.user_id_status": <int>,
+}
+----
+
+==== *Notification*:
+
+[source,json]
+----
+{
+  "notification.jam": <int>, //0 = ok, 1 = jam deteceted
+  "notification.tamper": <int>, //0 = ok, 1 = tamper detected
+  "notification.issue": <int>,
+}
+----
+
+==== *By Pass*:
+
+[source,json]
+----
+{
+  "bypass.hue": <int>
+  "bypass.level": <int>,
+  "bypass.on_off": <boolean>,
+  "bypass.saturation": <int>,
+  "bypass.color_temperature": <int>,
+}
+----
+
+==== *Motion*:
+
+[source,json]
+----
+{
+  "motion.value": <int>,
+}
+----
+
+==== *Door Sensor*:
+
+[source,json]
+----
+{
+  "door_sensor.value": <int>,
+}
+----
+
+==== *Smoke*:
+
+[source,json]
+----
+{
+  "smoke_sensor.value": <int>,
+}
+----
+
+==== *AC Status*:
+
+[source,json]
+----
+{
+  "ac_status.value": <int>, //0 = Ac Un-Plugged, 1 = AC Plugged In
+}
+----
+
+==== *Battery*:
+
+[source,json]
+----
+{
+  "battery.percent": <int>, //0 - 100%
+  "battery.status": <int>, // 0: okay; 1: out
+  "battery.percent_threshold": <int>, 
+  "battery.voltage": <int>, //unit: 100mV, Example: 11 → 1100mV
+  "battery.voltage_threshold": <int>,
+}
+----
+
+==== *Temperature*:
+
+[source,json]
+----
+{
+  "temperature.value": <float>,
+  "temperature.unit": <string>,
+}
+----
+
+==== *Humidity*:
+
+[source,json]
+----
+{
+  "humidity.value": <float>,
+  "humidity.unit": <string>,
+}
+----
+
+==== *Illuminance*:
+
+[source,json]
+----
+{
+  "illuminance.value": <float>,
+  "illuminance.unit": <string>,
+}
+----
+
+==== *PM 25*:
+
+[source,json]
+----
+{
+  "pm_25.value": <float>,
+  "pm_25.unit": <string>,
+}
+----
+
+==== *CO*:
+
+[source,json]
+----
+{
+  "co.value": <float>,
+  "co.unit": <string>,
+}
+----
+
+==== *CO2*:
+
+[source,json]
+----
+{
+  "co2.value": <float>,
+  "co2.unit": <string>,
+}
+----
+
+==== *Power Consumption*:
+
+[source,json]
+----
+{
+  "power_consumption.value": <float>,
+  "power_consumption.unit": <string>,
+}
+----
+
+==== *Power*:
+
+[source,json]
+----
+{
+  "power.value": <float>,
+  "power.unit": <string>,
+}
+----
+
+==== *Voltage*:
+
+[source,json]
+----
+{
+  "voltage.value": <float>,
+  "voltage.unit": <string>,
+}
+----
+
+==== *Current*:
+
+[source,json]
+----
+{
+  "current.value": <float>,
+  "current.unit": <string>,
+}
+----
+
+== *Example Device Model*:
+
+[source,json]
+----
+{
+  "id": "DeviceID"
+  //TBD
+}
+----

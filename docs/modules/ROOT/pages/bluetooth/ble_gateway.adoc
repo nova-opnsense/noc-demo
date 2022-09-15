@@ -1,0 +1,241 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Service Gateway*
+:toc: left
+
+:Date:      02/06/2022
+:pic:       Tung Nguyen
+:version:   0.1
+
+== *Overview*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|Protocol
+|Bluetooth Mesh
+
+|{counter:feature}
+|OS support
+|Linux, OpenWrt
+
+|{counter:feature}
+|SDK
+|Bluetooth SDK in Gecko SDK (v4.0.2)
+
+|{counter:feature}
+|Gateway
+|Nano
+
+|{counter:feature}
+|NCP (network co-processor)
+|Devkit BRD4180A
+
+|{counter:feature}
+|End device
+|
+Only supports Philip HUE 
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Bluetooth.
+
+|===
+
+
+== *Device model*
+
+
+=== *Device structure*
+
+[source,json]
+----
+{
+    "id" : <string>,
+    "mac" : <string>,
+    "protocol" : <string>,
+    "nexthop_id" : <string>,
+    "status" : <int>,
+    "infos" : {
+      "manufacturer" : <string>,
+      "product_id" : <string>,
+      "fw_version" : <string>,
+      "joined_time" : <int>
+    },
+    "name" : <string>,
+    "power_source" : <int>,
+    "is_virtual" : <boolean>,
+    "is_sleepy" : <boolean>,
+    "end_points" : [
+      <end_point_1>,
+      <end_point_2>
+    ],
+    "ble_addr" : <string>,
+    "ble_addr_type" : <int>,
+    "tx_power" : <int>,
+    "rssi" : <int>,
+    "channel" : <int>,
+    "scan_data" : <string>,
+    "services" : [ 
+      {
+        "connection" : <int>,
+        "services" : <int>,
+        "encryption" : <int>,
+        "uuid" : <string>,
+        "characteristics" : [ 
+          {
+          "connection" : <int>,
+          "characteristics" : <int>,
+          "properties" : <int>,
+          "uuid" : <string>,
+          "value" : <string>
+          } 
+        ]
+      }
+    ]
+    "connection" : 1,
+    "grouping" : [ ]
+}
+----
+
+=== *Endpoint structure*
+Reference in Zigbee Gateway Doc
+
+
+=== *Device Define*
+
+==== *Device Type*
+Reference in Zigbee Gateway Doc
+
+==== *Attributes*
+Reference in Zigbee Gateway Doc
+
+==== *Door lock event*
+Reference in Zigbee Gateway Doc
+
+==== *Device status*
+
+[source,c]
+----
+typedef enum 
+{
+    STATUS_ALIVE = 0, /* JOINING SUCCESS */
+    STATUS_DOWN = SRC_BIT(0),
+    STATUS_IS_UPDATING_OTA = SRC_BIT(1),
+    STATUS_IS_JOINING = SRC_BIT(2), /* MEAN REQUEST ACTIVE ENDPOINT */
+    STATUS_IS_CONNECTING = SRC_BIT(3),
+
+    /* Bluetooth status */
+    // services
+    STATUS_IS_NEED_REQUEST_SERVICES = SRC_BIT(4),
+    STATUS_IS_REQUESTING_SERVICES = SRC_BIT(5),
+
+    // all info
+    STATUS_IS_NEED_REQUEST_ALL_INFO = SRC_BIT(6),
+    STATUS_IS_REQUESTING_ALL_INFO = SRC_BIT(7),
+
+    // build device
+    STATUS_IS_BUILD_DEVICE_INFO = SRC_BIT(8),
+
+    // Leaving 
+    STATUS_IS_NEED_LEAVING = SRC_BIT(10),
+    STATUS_IS_REQUESTING_DEVICE_ID = SRC_BIT(11),
+    STATUS_IS_NEED_HEALTH_CHECK = SRC_BIT(12),
+    STATUS_IS_PENDING_JOINING = SRC_BIT(13),
+
+    // ble
+    STATUS_IS_CONNECTION_LOST = SRC_BIT(14),
+    STATUS_IS_PARING_DEVICE = SRC_BIT(15),
+    STATUS_IS_MAINTENANCE_NETWORK = SRC_BIT(16),
+     
+    STATUS_MASK_ALL = 0xFFFFFFFF,
+} src_device_status_e;
+----
+
+==== *Power source*
+Reference in Zigbee Gateway Doc
+
+
+== *Service API*
+
+Reference in Software Documents -> Thing Service -> Hub Service -> Device API +
+"4. Thing Service - Hub Service interface"
+
+== *Supported Devices*
+=== *Light*
+- Philip HUE
+
+[source,c]
+----
+// All BIG ENDIAN
+#define DEVICE_NAME_SERVICE_UUID "1800"
+#define DEVICE_NAME_CHARACTERISTIC_UUID "2A00"
+
+#define MANUFACTURER_SERVICE_UUID "180A"
+#define MANUFACTURER_CHARACTERISTIC_UUID "2A29"
+
+#define PRODUCT_ID_SERVICE_UUID "180A"
+#define PRODUCT_ID_CHARACTERISTIC_UUID "2A24"
+
+#define FW_VERSION_SERVICE_UUID "180A"
+#define FW_VERSION_CHARACTERISTIC_UUID "2A28"
+
+#define PHILIP_HUE_ZIGBEE_MAC_SERVICE_UUID "FE0F"
+#define PHILIP_HUE_ZIGBEE_MAC_CHARACTERISTIC_UUID "97FE656100014F6286E9B71EE2DA3D22"
+
+#define PHILIP_HUE_ZIGBEE_DEVICE_NAME_SERVICE_UUID "FE0F"
+#define PHILIP_HUE_ZIGBEE_DEVICE_NAME_CHARACTERISTIC_UUID "97FE656100034F6286E9B71EE2DA3D22"
+
+#define PHILIP_HUE_ON_OFF_SERVICE_UUID "932C32BD000047A2835AA8D455B859DD"
+#define PHILIP_HUE_ON_OFF_CHARACTERISTIC_UUID "932C32BD000247A2835AA8D455B859DD"
+
+#define PHILIP_HUE_LEVEL_SERVICE_UUID "932C32BD000047A2835AA8D455B859DD"
+#define PHILIP_HUE_LEVEL_CHARACTERISTIC_UUID "932C32BD000347A2835AA8D455B859DD"
+
+#define PHILIP_HUE_COLOR_TEMPERATURE_SERVICE_UUID "932C32BD000047A2835AA8D455B859DD"
+#define PHILIP_HUE_COLOR_TEMPERATURE_CHARACTERISTIC_UUID "932C32BD000447A2835AA8D455B859DD"
+
+#define PHILIP_HUE_COLOR_SERVICE_UUID "932C32BD000047A2835AA8D455B859DD"
+#define PHILIP_HUE_COLOR_CHARACTERISTIC_UUID "932C32BD000547A2835AA8D455B859DD"
+
+#define PHILIP_HUE_FULL_ATTRIBUTE_SERVICE_UUID "932C32BD000047A2835AA8D455B859DD"
+#define PHILIP_HUE_FULL_ATTRIBUTE_CHARACTERISTIC "932C32BD000747A2835AA8D455B859DD"
+----
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Implemnt Basic Bluetooth gateway service.
+* [x] Works with End device, Home App (TS), WebUI.
+* [ ] Mesh Support.
+* [ ] Ranging Support.
+* [ ] Test long term.
+* [ ] Security NCP.
+* [ ] Implement bootloader NCP.
+* [ ] Support Backup, Restore, Replace.
+* [ ] Support OTA (need research more).
+* [ ] Health check.
+* [ ] Logging.
+* [ ] Network Topology.

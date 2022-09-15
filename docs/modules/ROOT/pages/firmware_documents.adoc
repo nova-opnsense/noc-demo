@@ -1,0 +1,57 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Firmware Documents*
+:toc: left
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|13/04/2022
+|Khoi Nguyen Doan Quang
+|1.0
+|Initial version.
+
+|===
+
+== *Document Overview*
+
+- This site includes all documents for Firmware team.
+- The document guidelines is still in developing mode.
+- The main purpose of this site is manage document as code.
+- The documents are contributed by everyone in Firmware team.
+
+== *Document Guidelines*
+
+- TBD.
+
+== *Staging Endpoints*
+
+=== *NATS Servers*
+
+- *NATS Server 1*: nats://nats-stagging.novaintechs.info:4222
+- *NATS Server 2*: nats://nats-stagging.novaintechs.info:4223
+- *NATS Server 3*: nats://nats-stagging.novaintechs.info:4224
+
+=== *Services*
+
+- *Mail*: https://mail.novaintechs.info:8443
+- *Document*: https://docs.novaintechs.info:8443
+- *Storage Server*: https://storage.novaintechs.info:8443
+- *Team City*: https://teamcity-stagging.novaintechs.info:8443
+- *Regis Service*: https://regis-stagging.novaintechs.info:8443
+- *Noti Service*: https://noti-stagging.novaintechs.info:8443
+- *Update Service*: https://update-stagging.novaintechs.info:8443
+- *Promox Server*: https://proxmox-stagging.novaintechs.info:8443
+
+== *Document Contributors*
+
+- TBD.

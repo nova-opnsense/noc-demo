@@ -1,0 +1,91 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Thing Server System Design*
+:toc: left
+
+== *Overview*
+- System design.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|07/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *System Design*
+
+=== *NATS Server*:
+- The NATS Server will be setup in a cluster mode which include three instances.
+- The connection to NATS server will be encrypted by TLS and user/pass are required for authorization.
+
+=== *Thing Server*:
+- Thing server is auto scaling by default, which can be run multiple instances for load balancing.
+
+=== *Database*:
+- The MariaDB with a cluster setup will be used as database for this system.
+
+=== *Applications*:
+- The main application for this system is a desktop app.
+
+=== *Identify Access Management (IAM)*:
+- The IAM include multiple services such as Authorize Service, Permission Service, Identity Service,...
+- The Authorize Service will be deployed base on an opensource project (TBD).
+
+=== *System Diagram*:
+
+[plantuml, "thing_server_system", png]
+----
+@startuml
+title: System Overview
+
+left to right direction
+
+node "NIT Thing Server" {
+  node "NATS Server" <<cluster setup>> {
+    [NATS Server] <<instance>> as server1
+    [NATS Server] <<instance>> as server2
+    [NATS Server] <<instance>> as server3
+  }
+
+  node "Thing Server" {
+    [Thing Server] <<scalable>> as ts
+  }
+
+  node "Apps" {
+    [Desktop App] <<native>> as dapp
+  }
+
+  database "MariaDB" <<cluster setup>> {
+    [Thing Server] <<db name>> as db
+  }
+
+  node "IAM" {
+    [Identity Service] <<open source>> as us
+  }
+
+  server1 -down-> server2
+  server2 -right-> server3
+  server3 -right-> server1
+
+  server1 <--> ts
+
+  dapp <-right-> server2
+
+  db <-right-> ts
+
+  us <-up-> ts
+}
+@enduml
+----

@@ -1,0 +1,148 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *NIT Identity Service*
+:toc: left
+
+== *Overview*
+- Setup KeyCloak.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|18/04/2022
+|Nga le
+|1.0
+|Initial Version.
+
+|===
+
+== *System Design*
+[plantuml, "system_design", png]
+----
+@startuml
+title: NIT Single Sign On
+
+left to right direction
+
+node "Identity Service" as iam {
+  [API Gateway] <<load balance>> as gateway
+
+  node "IAM Instances" {
+    [Service Instance 1] <<keycloak>> as iden1
+    [Service Instance 2] <<keycloak>> as iden2
+    [Service Instance ...] <<keycloak>> as iden3
+  }
+
+  database "PostgreSQL" {
+    [Indentity DB] as db
+  }
+
+  iden1 -d-> db
+  iden2 .d.> db
+  iden3 .d.> db
+
+  gateway -d-> iden1
+  gateway .d.> iden2
+  gateway .d.> iden3
+}
+@enduml
+----
+
+== *Setup System*
+
+=== *Setup KeyCloak*
+
+- *Download `KeyCloak`*:
+----
+user@host:~$ wget https://github.com/keycloak/keycloak/releases/download/17.0.1/keycloak-18.0.0.tar.gz
+
+user@host:~$ tar xvf keycloak-18.0.0.tar.gz && cd keycloak-18.0.0
+----
+
+- *Install SSL Certificate*:
+----
+user@host:~$ mv ./nova-indentity.pem ./conf/server.crt.pem
+
+user@host:~$ mv ./nova-indentity-key.pem ./conf/server.key.pem
+----
+
+- *Update `KeyCloak` Configuration*:
+----
+# Basic settings for running in production. Change accordingly before deploying the server.
+
+# Database
+
+# The database vendor.
+db=postgres
+
+# The username of the database user.
+db-username=root
+
+# The password of the database user.
+db-password=PASSWORD
+
+# The full database JDBC URL. If not provided, a default URL is set based on the selected database vendor.
+db-url=jdbc:postgresql://localhost/identity
+
+# Observability
+# If the server should expose healthcheck endpoints.
+health-enabled=true
+
+# If the server should expose metrics and healthcheck endpoints.
+#metrics-enabled=true
+
+# HTTP
+
+# The file path to a server certificate or certificate chain in PEM format.
+https-certificate-file=${kc.home.dir}conf/server.crt.pem
+
+# The file path to a private key in PEM format.
+https-certificate-key-file=${kc.home.dir}conf/server.key.pem
+
+# The proxy address forwarding mode if the server is behind a reverse proxy.
+proxy=edge
+
+# Do not attach route to cookies and rely on the session affinity capabilities from reverse proxy
+#spi-sticky-session-encoder-infinispan-should-attach-route=false
+
+# Hostname for the Keycloak server.
+hostname=nova-indentity
+
+# Hostname port
+hostname-port=8443
+----
+
+- *Build `KeyCloak` with `PostgreSQL`*:
+----
+user@host:~$ ./bin/kc.sh build
+Updating the configuration and installing your custom providers, if any. Please wait.
+2022-04-18 15:44:46,786 INFO  [io.quarkus.deployment.QuarkusAugmentor] (main) Quarkus augmentation completed in 4443ms
+Server configuration updated and persisted. Run the following command to review the configuration:
+
+  kc.sh show-config
+----
+
+- *Start `KeyCloak`*:
+----
+user@host:~$ export KEYCLOAK_ADMIN=root
+
+user@host:~$ export KEYCLOAK_ADMIN_PASSWORD=root-password
+
+user@host:~$ export PROXY_ADDRESS_FORWARDING=true
+
+user@host:~$ ./bin/kc.sh start
+----
+
+- *Open `KeyCloak` Home*:
+
+:imagesdir: ../../../assets/images
+image::keycloak_home.jpg[]

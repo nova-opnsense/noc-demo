@@ -1,0 +1,680 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Iptables*
+:toc: left
+
+:Date:      01/07/2022
+:pic:       Tho Do
+:version:   0.1
+
+== *Overview*
+Iptables is used to filter network package in Network Layer 3.
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|DNAT Forwarding
+|Forwarding Port from external to internal
+
+|{counter:feature}
+|DNAT DMZ
+|Pair new RE (Agent) to Mesh System
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Initial Docs
+
+|===
+
+
+== *Data model*
+
+
+=== Iptables structure
+
+[source,json]
+----
+{
+    "id": <string>,
+    "name": <string>,
+    "port_range": <string>,
+    "ip_mask": <string>,
+    "protocol": <string>,
+    "dnat_ip": <string>,
+    "dnat_port_range": <string>,
+    "enable": <bool>
+}
+----
+
+=== Iptables-List structure
+
+[source,json]
+----
+{
+    "iptable_list": <iptable_t[]>,
+    "nb_iptable": <int>
+}
+----
+
+=== Iptables Nova Service structure
+
+[source,json]
+----
+{
+    "name": <string>,
+    "port_profiles": <iptable_list_t>,
+}
+----
+=== Iptables Nova Service List structure
+
+[source,json]
+----
+{
+    "iptable_nova_service_list": <iptable_nova_service_t[]>,
+    "nb_iptable_nova_services": <int>,
+}
+----
+
+== *API*
+=== *DNAT Forwarding*
+==== *Created*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.created",
+    "source":"hub",
+    "data": [
+        {
+            "id": "",
+            "name": "SSH Nano forwarding",
+            "port_range": "8999:8999",
+            "ip_mask": "",
+            "protocol": "tcp",
+            "dnat_ip": "192.168.1.67",
+            "dnat_port_range": "22:22",
+            "Enable": false
+        }
+    ]
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.created",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "id": "",
+                "name": "SSH Nano forwarding",
+                "port_range": "8999:8999",
+                "ip_mask": "",
+                "protocol": "tcp",
+                "dnat_ip": "192.168.1.67",
+                "dnat_port_range": "22:22",
+                "Enable": false
+            }
+        ]
+    } 
+}
+----
+==== *Requested*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.requested",
+    "source":"hub",
+    "data": {}
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.responded",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "id": "",
+                "name": "SSH Nano forwarding",
+                "port_range": "8999:8999",
+                "ip_mask": "",
+                "protocol": "tcp",
+                "dnat_ip": "192.168.1.67",
+                "dnat_port_range": "22:22",
+                "Enable": false
+            }
+        ]
+    } 
+}
+----
+==== *Updated*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.updated",
+    "source":"hub",
+    "data": [
+                {
+                    "id": "",
+                    "name": "SSH Nano forwarding",
+                    "port_range": "8999:8999",
+                    "ip_mask": "",
+                    "protocol": "tcp",
+                    "dnat_ip": "192.168.1.67",
+                    "dnat_port_range": "22:22",
+                    "Enable": false
+                }
+        ]
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.updated",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "id": "",
+                "name": "SSH Nano forwarding",
+                "port_range": "8999:8999",
+                "ip_mask": "",
+                "protocol": "tcp",
+                "dnat_ip": "192.168.1.67",
+                "dnat_port_range": "22:22",
+                "Enable": false
+            }
+        ]
+    } 
+}
+----
+==== *Deleted*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.updated",
+    "source":"hub",
+    "data": [
+                {
+                    "id": "",
+                }
+        ]
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.dnat.port_forwarding.profiles.updated",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "id": "",
+                "name": "SSH Nano forwarding",
+                "port_range": "8999:8999",
+                "ip_mask": "",
+                "protocol": "tcp",
+                "dnat_ip": "192.168.1.67",
+                "dnat_port_range": "22:22",
+                "Enable": false
+            }
+        ]
+    } 
+}
+----
+=== *DNAT DMZ*
+==== *Created*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.iptables.dnat.dmz.profiles.created",
+    "source":"hub",
+    "data": [
+       {
+            "name": "SSH Nano DMZ2",
+            "ip_mask": "",
+            "dnat_ip": "192.168.1.67",
+            "enable": false
+        }
+    ]
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.iptables.dnat.dmz.profiles.created",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "name": "SSH Nano DMZ2",
+                "ip_mask": "",
+                "dnat_ip": "192.168.1.67",
+                "enable": false
+            }
+        ]
+    } 
+}
+----
+==== *Requested*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.iptables.dnat.dmz.profiles.requested",
+    "source":"hub",
+    "data": {}
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"ezm.hub.iptables.dnat.dmz.profiles.responded",
+    "source":"hub",
+    "data" :{
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "name": "SSH Nano DMZ2",
+                "ip_mask": "",
+                "dnat_ip": "192.168.1.67",
+                "enable": false
+            }
+        ]
+    } 
+}
+----
+=== *Nova-Service*
+==== *Created*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.iptables.nova-services.port-profiles.created",
+    "source":"hub",
+            "data": [
+            {
+                "name": "ssh",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "aloha",
+                        "port_range": "22:22",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "broker",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8883:8883",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8100:8101",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "old_web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "80:80",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8080:8080",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "9010",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            }
+        ]
+    
+}
+----
+
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.nova-services.port-profiles.created",
+    "source":"hub",
+    "data":
+    {
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "name": "ssh",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "aloha",
+                        "port_range": "22:22",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "broker",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8883:8883",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8100:8101",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "old_web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "80:80",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8080:8080",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "9010",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            }
+        ]   
+    }
+    
+    
+}
+----
+==== *Requested*
+===== Request
+[source,json]
+----
+{
+    "name":"hub.ezm.iptables.nova-services.port-profiles.requested",
+    "source":"hub",
+    "data": {}
+}
+----
+===== Respond
+[source,json]
+----
+{
+    "name":"hub.hub.iptables.nova-services.port-profiles.responded",
+    "source":"hub",
+    "data":
+    {
+        "error":
+        {
+            "code": <int>,
+            "message": string>
+        },
+        "data": [
+            {
+                "name": "ssh",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "aloha",
+                        "port_range": "22:22",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "broker",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8883:8883",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8100:8101",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            },
+            {
+                "name": "old_web",
+                "port_profiles": [
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "80:80",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "8080:8080",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    },
+                    {
+                        "id": "",
+                        "name": "",
+                        "port_range": "9010",
+                        "ip_mask": "192.168.0.0/16",
+                        "protocol": "tcp",
+                        "interface": "",
+                        "enable": true
+                    }
+                ]
+            }
+        ]   
+    }
+    
+    
+}
+----
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|100001
+|Unknown
+
+|100002
+|Setting Failed
+
+|100003
+|Interface Convert failed
+
+|100004
+|Internal Server Error
+
+|100005
+|Unauthorized
+
+|100006
+|ID Mismatched
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|===
+
+
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] API Define.
+* [ ] IPtable Process.
+

@@ -1,0 +1,361 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *App Overview*
+:toc: left
+
+== *Revision history*
+
+[cols="1,1,1", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+
+|09/05/2022
+|Tuan, Khuong
+|1.0
+|===
+
+== *Tablet Overview*
+:imagesdir: ../../../assets/images
+image::app/tablet_overview.jpg[image,width=421,height=469]
+
+== *Mobile Overview*
+:imagesdir: ../../../assets/images
+image::app/mobile_overview.jpg[image,width=421,height=469]
+
+== *Tablet State Machine Diagram*
+:imagesdir: ../../../assets/images
+image::app/state_machine.jpg[image,width=421,height=469]
+
+
+== *Register APP*
+
+=== *Diagram*
+:imagesdir: ../../../assets/images
+image::app/get_authen_info.jpg[image,width=421,height=469]
+
+=== *Register API*
+
+- *Method*: POST
+- *URL*: endpoint_url/register
+
+*Request payload:*
+
+----
+{
+  "id": <string>,
+  "name": <string>,
+  "software_info": {
+       //software infos [version,localname,operating system..]
+  },
+  "hardware_info": {
+      //hard infos
+  }
+}
+----
+
+*Response payload:*
+
+----
+{
+  "success": <bool>, 
+  "authen_info":{
+     "id": <string>,
+     "secret": <string>,
+     "claims": {}
+  },
+  "error_info":{
+      "code": <int>,
+      "message": <string>
+  }
+}
+----
+
+=== *Recovery API*
+- *Method*: POST
+- *URL*: endpoint_url/recover
+
+*Request payload:*:
+
+----
+{
+   "id": <string>,
+   "secret": <string>,
+   "claims": {
+            "user_id":<string> // email admin
+    }
+}
+----
+
+*Response payload:*:
+
+----
+{
+  "success": <bool>, 
+  "authen_info":{
+       "id": <string>,
+       "secret": <string>,
+       "claims": {
+           /// user_id
+       }
+},
+  "error_info":{
+      "code": <int>,
+      "message": <string>
+  }
+}
+----
+
+== *Login API*
+
+- *Method*: POST
+- *URL*: endpoint_url/authorize
+
+*Request payload:*:
+
+----
+{
+   "id": <string>,
+   "secret": <string>,
+   "claims": {
+       /// user_id
+   }
+}
+----
+
+*Response payload:*:
+
+----
+{
+  "success": <bool>, 
+  "jwt_info":{
+     "token": <string>,
+     "ttl": <double>,
+  },
+  "error_info":{
+      "code": <int>,
+      "message": <string>
+  }
+}
+----
+
+== *Get Broker Info*
+
+- *Method*: GET
+- *URL*: endpoint_url/auth/broker
+
+*Header*:
+
+----
+"AccessToken": <string> // token 
+----
+
+*Response payload:*
+
+----
+{
+  "success": <bool>, 
+  "broker_info":
+   {
+       "port": <int>,
+       "cafile": <string>,
+       "address":<string>
+    },
+  "error_info":{
+      "code": <int>,
+      "message": <string>
+  }
+}
+----
+
+== *Connect Mqtt Broker*
+
+- *client_id*: _prefix + uuid
+
+----
+ _prefix:
+    + ios : ios-phone-
+    + android phone : android-phone-
+    + android tablet : "android-tablet-"
+----
+
+- *address*: get from broker info [storage]
+- *port*: get from broker info [storage]
+- *user_name*: get from authen info [storage]
+- *password*: get from authen info [storage]
+- *ca_file*: get from authen info [storage]
+
+== *Connect Home*
+
+=== *Diagram*
+
+:imagesdir: ../../../assets/images
+image::app/login.jpg[image,width=421,height=469]
+
+- *subscribe topic*: "ts/status/#"
+- *check field*: "home_configured"
+
+----
+home_configured
+    + true: Home configured
+    + false: Home unconfigured
+----
+
+=== *Home Configured*
+
+==== *Request Home Data*
+
+- *Topic:* app/event/HOME_ID
+
+- *Payload:* 
+
+----
+{ 
+"name": "app.ts.home.data.requested", 
+"scope": "home", 
+"source": "app", 
+"home_id": "HOME_ID", 
+"user_id": "", 
+"id": "MESSAGE_ID", 
+"auth_token": "AUTH_TOKEN", 
+"parent_id": "", 
+"client_id": "APP_ID", 
+"created_time": 1584501452048, 
+"data": <null> 
+}
+----
+
+==== *Response Home Info*
+
+- *Topic:*  ts/event/APP_ID
+
+- *Payload:* 
+
+----
+{ 
+ "name": "ts.app.home.responded", 
+ "scope": "user", 
+ "source": "ts", 
+ "home_id": "HOME_ID", 
+ "user_id": "", 
+ "id": "MESSAGE_ID", 
+ "auth_token": "AUTH_TOKEN", 
+ "parent_id": "", 
+ "client_id": "TS_ID", 
+ "created_time": 1584501452048, 
+ "data": { 
+ <home_structure> 
+ } 
+}
+----
+
+=== *Home Unconfigured*
+
+==== *Request Create Admin*
+
+- *Topic:*  app/event/HOME_ID
+
+----
+HOME_ID: get from storage
+----
+
+- *Payload:*
+
+----
+{ 
+"name": "app.ts.user.admin.created", 
+"scope": "user", 
+"source": "app", 
+"home_id": "HOME_ID", 
+"user_id": "", 
+"id": "MESSAGE_ID", 
+"auth_token": "AUTH_TOKEN", 
+"parent_id": "", 
+"client_id": "APP_ID", 
+"created_time": 1584501452048, 
+"data": <null> 
+}
+----
+
+==== *Response Admin Created*
+
+- *Topic:*  ts/event/APP_ID
+
+- *Payload:* 
+
+----
+{ 
+ "name": "ts.app.user.admin.created", 
+ "scope": "user", 
+ "source": "ts", 
+ "home_id": "HOME_ID", 
+ "user_id": "", 
+ "id": "MESSAGE_ID", 
+ "auth_token": "AUTH_TOKEN", 
+ "parent_id": "", 
+ "client_id": "TS_ID", 
+ "created_time": 1584501452048, 
+ "data": { 
+ <create_user_admin_model> 
+ } 
+}
+----
+
+- *Create user admin model*
+
+----
+{
+ "user_id":<string> // email admin    
+}
+----
+
+
+==== *Request Home Data:*
+
+- *Topic:* app/event/HOME_ID
+
+- *Payload:* 
+
+----
+{ 
+"name": "app.ts.home.data.requested", 
+"scope": "home", 
+"source": "app", 
+"home_id": "HOME_ID", 
+"user_id": "", 
+"id": "MESSAGE_ID", 
+"auth_token": "AUTH_TOKEN", 
+"parent_id": "", 
+"client_id": "APP_ID", 
+"created_time": 1584501452048, 
+"data": <null> 
+}
+----
+
+==== *Response Home Info*
+
+- *Topic:*  ts/event/APP_ID
+
+- *Payload:* 
+
+----
+{ 
+ "name": "ts.app.home.responded", 
+ "scope": "user", 
+ "source": "ts", 
+ "home_id": "HOME_ID", 
+ "user_id": "", 
+ "id": "MESSAGE_ID", 
+ "auth_token": "AUTH_TOKEN", 
+ "parent_id": "", 
+ "client_id": "TS_ID", 
+ "created_time": 1584501452048, 
+ "data": { 
+ <home_structure> 
+ } 
+}
+----

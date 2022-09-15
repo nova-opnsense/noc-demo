@@ -1,0 +1,328 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Door lock*
+:toc: left
+
+:Date:      16/06/2022
+:pic:       Tung Nguyen
+:version:   0.1
+
+== *Overview*
+Zigbee door lock.
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|{Date}
+|{pic}
+|{version}
+|Zigbee Door lock
+
+|===
+
+== *Description*
+
+=== *Device type* ===
+
+[source,c]
+----
+
+typedef enum
+{
+    ...
+    SRC_DEVICE_TYPE_DOOR_LOCK = 5,
+    ...
+} src_device_type_t; 
+----
+
+=== *Attribute* ===
+[%autowidth.stretch]
+[cols="1,1,1,1,1,3", options="header"]
+|===
+|*STT*
+|*Attribute*
+|*Sub-Attribute*
+|*Type*
+|*Is controllable*
+|*Description*
+
+|{counter:attr}
+.7+|door_lock
+|locked
+|boolean
+|true
+|
+true: locked +
+false: unlocked
+
+|{counter:attr}
+|event
+|int
+|false
+|Reference "Door Lock event"
+
+|{counter:attr}
+|user_id
+|int
+|true
+|
+
+|{counter:attr}
+|user_id_status
+|int
+|false
+|
+0 = available +
+1 = occupied
+
+|{counter:attr}
+|pin_code
+|string
+|true
+|Default: ""
+
+|{counter:attr}
+|max_user
+|int
+|false
+|
+
+|{counter:attr}
+|Command
+|int
+|true
+|command: Reference 
+
+
+|{counter:attr}
+.3+|notification
+|tamper
+|int
+|true
+|
+0 = okie +
+1 = tamper_detected
+
+|{counter:attr}
+|issue
+|int
+|true
+|value: Reference "Door lock notification issues"
+
+|{counter:attr}
+|jam
+|int
+|true
+|
+0 = okie +
+1 = jam_detected
+
+
+|{counter:attr}
+.5+|battery
+|status
+|int
+|false
+|
+0 = okie +
+1 = out of battery
+
+|{counter:attr}
+|percent
+|int
+|false
+|0-100 (%)
+
+|{counter:attr}
+|percent_threshold
+|int
+|false
+|
+
+|{counter:attr}
+|voltage
+|int
+|false
+|unit: 100mV, Example: 11 -> 1100mV
+
+|{counter:attr}
+|voltage_threshold
+|int
+|false
+|
+
+|===
+
+=== *Users pincode* ===
+
+Door lock list of pincode is in "user_pin" of endpoint.
+
+[source,json]
+----
+Examples device structure:
+
+{
+    "id" : <string>,
+    "name" : "Door lock"
+    "end_points" : [
+        {
+            "id": "1",
+            "type": 5,
+            "name": "door_lock",
+            "attributes": {
+
+            },
+            "user_pins": [ // <<<<< USER PIN LIST >>>>>
+                {
+                    "id": <int>,
+                    "pin": <string> // octet-string
+                }
+            ]
+        }
+    ]
+}
+----
+
+
+=== *Lock/unlock*
+
+image::door_lock/lock.svg[align="center",680]
+[.text-center]
+Figure {counter:figure}. Lock unlock.
+
+
+=== *Event report* ===
+
+image::door_lock/events.svg[align="center",480]
+[.text-center]
+Figure {counter:figure}. Events report.
+
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+| *LOCK_EVT_XXX*         | *Value*  | *Description*           | *Attribute*
+|LOCK_EVT_MANUAL_LCK	        |1	|   Manual lock operation | "door_lock.event"
+|LOCK_EVT_MANUAL_ULCK	        |2	|   Manual unlock operation | "door_lock.event"
+|LOCK_EVT_RF_LCK	            |3	|   RF lock operation | "door_lock.event"
+|LOCK_EVT_RF_ULCK	            |4	|   RF unlock operation | "door_lock.event"
+|LOCK_EVT_KEYPAD_LCK	        |5	|   Keypad lock operation with user identifier info | "door_lock.event"
+|LOCK_EVT_KEYPAD_ULCK	        |6	|   Keypad unlock operation with user identifier info | "door_lock.event", +
+ "door_lock.user_id"
+|LOCK_EVT_MANUAL_NOT_FUL_LCK	|7	|   Manual not fully locked operation |
+|LOCK_EVT_RF_NOT_FUL_LCK	    |8	|   RF not fully locked operation |
+|LOCK_EVT_AUTO_LCK	            |9	|   Auto lock locked operation |
+|LOCK_EVT_AUTO_NOT_FUL_OPER	    |10 |	Auto lock not fully operation |
+|LOCK_EVT_ALL_CODE_DEL	        |11 |	All user codes deleted |
+|LOCK_EVT_1_CODE_DEL	        |12 |	Single user code deleted | "door_lock.event", +
+"door_lock.user_id", +
+"door_lock.pin_code"
+|LOCK_EVT_CODE_ADDED	        |13 |	New user code added  | "door_lock.event", +
+"door_lock.user_id", +
+"door_lock.pin_code"
+|LOCK_EVT_CODE_DUP	            |14 |	New user code not added due to duplicate code |
+|LOCK_EVT_KEYPAD_DISABLED	    |15 |	Keypad temporary disabled |
+|LOCK_EVT_KEYPAD_BUSY	        |16 |	Keypad busy |
+|LOCK_EVT_NEW_PROG_CODE	        |17 |	New program code entered - unique code for lock configuration |
+|LOCK_EVT_USR_CODE_LIMIT	    |18 |	Manually enter user access code exceeds code limit |
+|LOCK_EVT_RF_ULCK_INVLD_CODE	|19 |	Unlock by RF with invalid user code |
+|LOCK_EVT_RF_LCK_INVLD_CODE	    |20 |	Locked by RF with invalid user code |
+|LOCK_EVT_BIOMETRIC_LCK	        |101|	Zigbee Add: lock by fingerprint | "door_lock.event", +
+"door_lock.user_id"
+|LOCK_EVT_BIOMETRIC_ULCK	    |102|	Zigbee Add : unlock by fingerprint | "door_lock.event", +
+"door_lock.user_id"
+|===
+
+
+=== *Notification* ===
+
+image::door_lock/notification.svg[align="center",480]
+[.text-center]
+Figure {counter:figure}. Notification.
+
+[source,c]
+----
+// "notification.jam"
+#define SRC_JAM_NOT_DETECTED 0
+#define SRC_JAM_DETECTED 1
+
+// "notification.tamper"
+#define SRC_TAMPER_NOT_DETECTED 0
+#define SRC_TAMPER_DETECTED 1
+
+// "notification.issue"
+typedef enum 
+{
+    ISSUE_OKIE = 0,
+    ISSUE_RESET_TO_FACTORY_DEFAULTS = 1,
+    ISSUE_RF_MODULE_POWER_CYCLED = 2,
+    ISSUE_FORCED_DOOR_OPEN = 3,
+    ISSUE_DOOR_AJAR = 4,
+    ISSUE_COERCED = 5,
+} src_notification_issue_e;
+----
+
+
+=== *Setting Commands* ===
+
+image::door_lock/settings.svg[align="center",680]
+[.text-center]
+Figure {counter:figure}. Settings.
+
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+| *COMMAND*         
+| *Value*  
+| *Description*           
+| *Attribute*
+
+|COMMAND_CLEAR_ALL_PIN_CODE	        
+|1	
+|Clear all pin code
+|"door_lock.command"
+
+|COMMAND_SET_PIN_CODE	        
+|2	
+|Add user
+|"door_lock.command" +
+"door_lock.user_id" +
+"door_lock.pin_code" 
+
+
+|COMMAND_GET_PIN_CODE
+|3	
+|Get user pin code
+|"door_lock.command" +
+"door_lock.user_id" 
+
+
+|COMMAND_CLEAR_PIN_CODE 
+|4
+|Delete user
+|"door_lock.command" +
+"door_lock.user_id"
+
+|===
+// [source,c]
+// ----
+// typedef enum 
+// {
+//     SRC_DOORLOCK_COMMAND_CLEAR_ALL_PIN_CODE = 0x01,
+//     SRC_DOORLOCK_COMMAND_SET_PIN_CODE = 0x02,
+//     SRC_DOORLOCK_COMMAND_GET_PIN_CODE = 0x03,
+//     SRC_DOORLOCK_COMMAND_CLEAR_PIN_CODE = 0x04,
+// } src_doorlock_command_e;
+// ----

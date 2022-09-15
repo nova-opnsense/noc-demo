@@ -1,0 +1,356 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Authen Service*
+:toc: left
+
+== *Overview*
+- Authentication Flow.
+- Authen Service APIs.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|16/02/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|16/02/2022
+|Nga Le
+|1.1
+|Add error codes.
+
+|===
+
+== *Services Authentication*
+
+- The connection between the external services and MQTT broker is secured by TLS.
+
+- The external services will need to register into Authen Service before connecting to MQTT Broker.
+
+- The MQTT broker will validate a client connection by sending an HTTPS request to Authen Service.
+
+- The Authen Info (id, secret) will be used as username and password to connect to MQTT Broker.
+
+- The Thing Service will only accept request messages from external services which had a JWT token.
+
+=== *Authen Sequence*
+
+[plantuml, "service_authen_sequence", png]
+----
+@startuml
+autonumber
+ExternalService --> AuthenService: Register Service.
+AuthenService -> AuthenService: Generate Authen Info.
+AuthenService --> ExternalService: Return Authen Info.
+ExternalService --> AuthenService: Login with Authen Info.
+AuthenService -> AuthenService: Validate Authen Info.
+alt success case
+AuthenService --> ExternalService: Return JWT Token.
+ExternalService --> AuthenService: Request Broker Info with JWT Token.
+AuthenService -> AuthenService: Get Broker Info.
+AuthenService --> ExternalService: Return Broker info.
+ExternalService --> MqttBroker: Connect with Authen Info.
+MqttBroker --> AuthenService: Check Authen Info.
+AuthenService -> AuthenService: Validate Authen Info.
+alt authen case
+AuthenService --> MqttBroker: Accepted connection.
+MqttBroker <--> ExternalService: Established TLS Connection.
+else un-authen case
+autonumber 13 1
+AuthenService --> MqttBroker: Rejected Connection.
+MqttBroker --> ExternalService: Return Un-Authorized Error.
+end
+else failed case
+autonumber 6 1
+AuthenService --> ExternalService: Return Un-Authorized Error.
+end
+@enduml
+----
+
+- *Notes*: In the diagram, The *ExternalService* can be Detection Service, Web Service, Mobile App,...
+
+=== *Register Service*:
+
+==== *Request*:
+
+- *Method*:  _POST_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/register_
+
+- *Payload*:
+
+[source,json]
+----
+{
+	"id": <string>, //unique service id
+	"name": <string>,
+	"software_info": {
+		//attributes
+		//i.e. version
+	},
+	"hardware_info": {
+		//attributes
+		//i.e. mac address
+	}
+}
+----
+
+==== *Response*:
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"authen_info": {
+		"id": <string>,
+		"secret": <string>
+	}
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Login Service*:
+
+==== *Request*:
+
+- *Method*:  _POST_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/login_
+
+- *Payload*:
+
+[source,json]
+----
+{
+	"id": <string>, //id get from register
+	"secret": <string> //secret get from register
+}
+----
+
+==== *Response*:
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"jwt_info": {
+		"ttl": <int64>, //time stamp in second
+		"token": <string>,
+		"public_key": <string>,
+	}
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Authorize Service*:
+
+==== *Request*:
+
+- *Method*:  _POST_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/authorize_
+
+- *Payload*:
+
+[source,json]
+----
+{
+	"id": <string>, //id get from register
+	"secret": <string> //secret get from register
+	"claims": {
+		//authorize infos
+		//e.g. user_id
+	}
+}
+----
+
+==== *Response*:
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"jwt_info": {
+		"ttl": <int64>, //time stamp in second
+		"token": <string>,
+		"public_key": <string>,
+	}
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Validate Service*:
+
+==== *Request*:
+
+- *Method*:  _POST_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/validate_
+
+- *Payload*:
+
+[source,json]
+----
+{
+	"id": <string>, //id get from register
+	"secret": <string> //secret get from register
+}
+----
+
+==== *Response*:
+
+- This request will return only status code. Ok = 200, UnAuthorized = 401.
+
+=== *Recover Service Secret*:
+
+==== *Request*:
+
+- *Method*:  _POST_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/recover_
+
+- *Payload*:
+
+[source,json]
+----
+{
+	"id": <string>, //service id
+	"hardware_info": {
+		//registered hardward info
+	}
+}
+----
+
+==== *Response*:
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"authen_info": {
+		"id": <string>,
+		"secret": <string>
+	}
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Request Broker Info*:
+
+==== *Request*:
+
+- *Method*:  _GET_
+
+- *Header*: _AccessToken: JWT_TOKEN_
+
+- *Endpoint Url*:  _https://AUTHEN_SERVICE:PORT/auth/broker_
+
+==== *Response*:
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"broker_info": {
+		"port": <int>,
+		"cafile": <string>,
+		"address": <string>
+	}
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+== *Authentication Error Codes*
+
+[source,c++]
+----
+NoError = 0,
+ServiceIsExisted = 1,      // return when a service re-try to register
+ServiceInfoIsMissing = 2,  // return when id or name of service is missing
+AuthenInfoIsMissing = 3,   // return when id or secret is missing
+UnAuthorizedService = 4,   // return when providing wrong id & secret
+GenerateTokenFailed = 5,   // return when system fail to generate token
+InvalidAccessToken = 6,    // return when service provided invalid token
+InvalidRecoverInfo = 7,   // return when service provided invalid recover info
+InvalidHardwareInfo = 8,  // return when service provided invalid info
+----

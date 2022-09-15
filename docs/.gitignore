@@ -1,0 +1,6 @@
+**/*.pdf
+*.pdf
+*.DS_Store
+.asciidoctor
+build
+/.idea/

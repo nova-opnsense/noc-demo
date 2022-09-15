@@ -1,0 +1,173 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Hub Status Message*
+:toc: left
+
+== *Overview*
+- Status message structure.
+- Sample service status message.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|25/02/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|===
+
+== *Status Message*
+
+=== *Status Define*:
+
+----
+constexpr auto kConnected = 1,
+constexpr auto kDisConnected = 2,
+constexpr auto kConnectionLost = 3,
+----
+
+=== *Topic Format*:
+
+----
+  SERVICE_TYPE/status/SERVICE_ID
+----
+
+=== *Message Structure*:
+
+[source,json]
+----
+{
+  "id": <string>,
+  "name": <string>,
+  "status": <int>,
+  "software_info": {
+    //attributes
+  },
+  "hardware_info": {
+    //attributes
+  }
+}
+----
+
+== *Service Status*
+
+=== *Thing Service*:
+
+- *Topic*: _ts/status/TS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "ts-1234",
+  "name": "Thing Service",
+  "status": 1, //connected
+  "software_info": {
+    "version": "1.0.0",
+    "build_date": "Fri Feb 25 18:03:51 +07 2022"
+    //other software info
+  },
+  "hardware_info": {
+    //hardware info
+  }
+}
+----
+
+=== *Mobile App*:
+
+- *Topic*: _app/status/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "app-1234",
+  "name": "Mobile App",
+  "status": 1, //connected
+  "software_info": {
+    //software info
+  },
+  "hardware_info": {
+    //hardware info
+  }
+}
+----
+
+=== *Hub Service*:
+
+- *Topic*: _hub/status/HUB_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "hub_e84a4473-41e0-4375-a3d0-59ca134f1224",
+  "name": "HUB_PRO",
+  "status": 0,
+  "software_info": {
+    "version": "0.0.1",
+    "commit": "0d2168e69dd18f5548d128d886ca8067aec88ab2",
+    "build_date": ""
+  },
+  "hardware_info": {
+    "protocol.zib": false,
+    "protocol.zwa": false
+  }
+}
+----
+
+=== *Detection Service*:
+
+- *Topic*: _ds/status/DS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "ds-1234",
+  "name": "Detection Service",
+  "status": 1, //connected
+  "software_info": {
+    //software info
+  },
+  "hardware_info": {
+    //hardware info
+  }
+}
+----
+
+
+=== *Voice Service*:
+
+- *Topic*: _vs/status/VS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "vs-1234",
+  "name": "Voice Service",
+  "status": 1, //connected
+  "software_info": {
+    //software info
+  },
+  "hardware_info": {
+    //hardware info
+  }
+}
+----

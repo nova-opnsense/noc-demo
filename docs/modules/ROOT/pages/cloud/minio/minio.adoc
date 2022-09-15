@@ -1,0 +1,132 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *MinIO*
+:toc: left
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|05/13/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *Setup Environment*
+
+Ubuntu 20.04
+
+== *Install MinIO*
+
+[source,text]
+----
+wget https://dl.min.io/server/minio/release/linux-amd64/minio
+chmod +x minio
+----
+
+Make it executable:
+[source,text]
+----
+sudo chmod +x minio
+----
+
+Move to /usr/local/bin
+[source,text]
+----
+sudo mv minio /usr/local/bin
+----
+
+Create data directory
+[source,text]
+----
+mkdir ~/minio
+----
+
+Add credentials environment variables:
+[source,text]
+----
+nano ~/.bashrc
+----
+Add following lines:
+[source,text]
+----
+export MINIO_ROOT_USER=minioadmin
+export MINIO_ROOT_PASSWORD=your_password
+----
+[source,text]
+----
+source ~/.bashrc
+----
+
+Start MinIO on port 9090
+[source,text]
+----
+minio server ~/minio --console-address :9090
+----
+
+Open your web browser and type the URL http://localhost:9090 to login with above user/pass
+
+:imagesdir: ../../../assets/images
+image::app/minio.jpg[image]
+
+== *Minio Systemd Startup Service*
+
+Create file /etc/systemd/system/minio.service
+
+Add following lines:
+[source,text]
+----
+
+[Unit]
+Description=Minio
+After=network.target
+Wants=network.target
+
+[Service]
+Environment="MINIO_ROOT_USER=minioadmin"
+Environment="MINIO_ROOT_PASSWORD=your_password"
+ExecStart=/usr/local/bin/minio server /home/sw-admin/minio --console-address :9090
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+----
+
+Reload systemd and start minio service
+[source,text]
+----
+sudo systemctl daemon-reload
+sudo systemctl start minio.service
+----
+
+== *IAM Policy*
+IAM Policy allows read and write access to specify Bucket
+[source,json]
+----
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::bucket_name_x/*",
+                "arn:aws:s3:::bucket_name_y/*",
+            ]
+        }
+    ]
+}
+----

@@ -1,0 +1,57 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Notification API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|15/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/event_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Push Notification*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.notification.created",
+  "scope": "notification",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "USER_ID",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <event_structure>
+  }
+}
+----

@@ -1,0 +1,386 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Scene API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|17/03/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/scene_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Scene List*:
+
+==== *Message Interface*:
+
+*Scene List Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.scene.list.requested",
+  "scope": "scene",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Scene List Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.scene.list.responded",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "scenes": [
+      <scene_structure>,
+      <scene_structure>,
+      <scene_structure>
+    ]
+  }
+}
+----
+
+=== *Create Scene*:
+
+==== *Message Interface*:
+
+*Request Create Scene*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.scene.created",
+  "scope": "scene",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Create Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.scene.created",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Update Scene*:
+
+==== *Message Interface*:
+
+*Request Update Scene*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.scene.updated",
+  "scope": "scene",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Update Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.scene.updated",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+
+=== *Delete Scene*:
+
+==== *Message Interface*:
+
+*Request Delete Scene*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.scene.deleted",
+  "scope": "scene",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Delete Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.scene.deleted",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <scene_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Trigger Scene*:
+
+==== *Message Interface*:
+
+*Request Trigger Scene*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.scene.triggered",
+  "scope": "scene",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "scene_id": <string>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "scene",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

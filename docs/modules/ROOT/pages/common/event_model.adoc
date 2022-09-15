@@ -1,0 +1,88 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Event Model*
+:toc: left
+
+== *Overview*
+- Data Structure.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|15/04/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|15/04/2022
+|Nga Le
+|1.1
+|Add Event Types.
+
+|===
+
+== *Data Structure*
+
+=== *Event Structure*:
+
+[source,json]
+----
+{
+  "type": <int>,
+  "id": <string>,
+  "created_time": <int64>,
+  "attributes": {
+    //event attributes
+  }
+}
+----
+
+=== *Event Types*:
+
+[source,c++]
+----
+// unknown
+Unknown = 0,
+
+// door sensor
+DoorSensorOpened = 1,
+DoorSensorClosed = 2,
+
+// motion sensor
+MotionCleared = 3,
+MotionDetected = 4,
+
+// smoke sensor
+SmokeCleared = 5,
+SmokeDetected = 6,
+
+// enviroment sensor
+TemperatureChanged = 7,
+HumidityChanged = 8,
+IlluminanceChanged = 9,
+Pm25Changed = 10,
+CoChanged = 11,
+Co2Changed = 12,
+BatteryLow = 13,
+
+// system events
+SceneTriggered = 100,
+TimeChanged = 101,
+DeviceStateChanged = 102,
+SecurityModeChanged = 103,
+UserControlRequested = 104,
+
+// cloud events
+CloudConnected = 200,
+CloudDisconnected = 201,
+----
+

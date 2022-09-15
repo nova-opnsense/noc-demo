@@ -1,0 +1,764 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Define Automation*
+:toc: left
+
+== *Automation Model*
+
+[source,json]
+----
+{
+  "id": <String>,
+  "name:": <String>,
+  "enable": <bool>, // enable, disable automation
+  "last_run_time": <int>
+  "conditions": {
+    "precondition": {
+      "Precondition Model"
+    },
+    "time": {
+      "Time Model"
+    },
+    "device_status": [
+      "Device Status Model"
+    ],
+    "location_mode": {
+      "Location Mode Model"
+    },
+    "security_mode": {
+      "Security Mode Model"
+    }
+  },
+  "actions": {
+    "devices": [
+      "Device Control Model"
+    ],
+    "scene": {
+      "Automation Scene Model"
+    },
+    "notify": {
+      "Notify Model"
+    },
+    "security_mode": {
+      "Automation Security Model"
+    }
+  }
+}
+----
+
+== *Condition*
+
+=== *Precondition*
+[source,json]
+----
+{
+  "type": <int>, //event type
+  "id": <String>,
+} 
+----
+*Note:* For when the type is:
+
+* Time, Location: value of id is blank
+* Device: value of id is device id
+* Security: value of id is armed id
+
+==== *Type*
+- *Reference Event Type*: xref:common/event_model.adoc[]
+
+=== *Time Model*
+
+[source,json]
+----
+{
+  "type": <int>,
+  "start_hour": <int>,
+  "start_minute": <int>,
+  "duration": <int>, //unit: minute
+  "is_one_time_per_day": <bool>, 
+  "days_of_weeks": <List<int>>
+} 
+----
+==== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Specific Time
+|2|Period of Time
+|3|Any Time 
+|===
+
+==== *Days Of Weeks*
+
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Sunday
+|1|Monday
+|2|Tuesday
+|3|Wednesday
+|4|Thursday
+|5|Friday
+|6|Saturday
+|===
+
+=== *Device Status Model*
+[source,json]
+----
+{
+  "id": <String>,
+  "end_points": [
+    "Endpoint Status Model"
+  ]
+}
+----
+
+==== *Endpoint status model*
+[source,json]
+----
+{
+  "id": <String>,
+  "type": <int>,
+  "attributes": {},
+  "ranges": <Range>[
+    "Range Model"
+  ]
+}
+----
+===== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Control Attribute
+|2|Control Range
+|3|Sensor Attribute
+|4|Sensor Range
+|===
+
+===== *Range Model*
+[source,json]
+----
+{
+  "name": <String>,
+  "min": <double>,
+  "max": <double>
+}
+----
+
+=== *Location Mode Model*
+
+[source,json]
+----
+{
+  "type": <int>
+}
+----
+
+==== *Type*
+
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Away
+|2|Home
+|3|Night
+|===
+
+=== *Security Mode Model*
+[source,json]
+----
+{
+  "type": <int>,
+  "armed_id": <String> 
+}
+----
+*Note:* when the type is "Custom Armed", input armed id of custom armed, otherwise armed id for Armed or Disarmed type is *ARMED* and *DISARMED* accordingly
+
+==== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Armed
+|2|Disarmed
+|3|Custom Armed
+|===
+
+== *Action*
+
+=== *Device Control Model*
+
+[source,json]
+----
+{
+  "id": <String>,
+  "duration": <int>, //unit: minute
+  "start_actions": [
+    "List Endpoint Control Model"
+  ],
+  "end_actions":[
+  ]
+}
+----
+
+
+==== *Endpoint Control Model*
+
+[source,json]
+----
+{
+  "id": <String>,
+  "attributes": {}
+}
+----
+
+=== *Scene Model*
+[source,json]
+----
+{
+  "type": <int>,
+  "scene_id": <String> //if there are screen selected, input scene id
+}
+----
+==== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Scene Selected
+|===
+
+
+=== *Notify Model*
+
+[source,json]
+----
+{
+  "type": <int>,
+  "message": <String>
+}
+----
+==== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|No Push
+|1|Push
+|===
+
+=== *Security Mode Model*
+[source,json]
+----
+{
+  "type": <int>,
+  "armed_id": <String>
+}
+----
+*Note:* when the type is "Custom Armed", input armed id of custom armed, otherwise the id for Armed or Disarmed type is *ARMED* and *DISARMED* accordingly
+
+==== *Type*
+[cols="1,1", options="header"]
+|===
+|*Key*
+|*Value*
+|0|Unknown
+|1|Armed
+|2|Disarmed
+|3|Custom Armed
+|===
+== *Use case*
+=== *Scenario 1*
+Set up schedule for turning on balcony light at 8:30PM every Monday
+
+* *Condition:*
+** Time condition:
+*** Type: Specific Time
+*** Time: 8:30 PM (20:30)
+*** Day(s) of week: Monday
+*** One Time Per Day: Yes
+* *Action:*
+** Device(s) action:
+*** Turning on balcony light
+
+Sample request:
+[source,json]
+----
+{
+  "id": "balcony_light_automation_id",
+  "name:": "Balcony Light",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 1, // Specific Time
+        "start_hour": 20,
+        "start_minute": 30,
+        "duration": 0,
+        "is_one_time_per_day": true, 
+        "days_of_weeks": [0] //Monday
+      } 
+    },
+    "device_status": [],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "balcony_light_id",
+        "duration": 0,
+        "start_actions": [
+          {
+            "id": "balcony_light_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 2*
+Set up schedule for turning on balcony light if there are people on the balcony in time frame 7:30PM to 10:30PM everyday
+
+* *Condition:*
+** Time condition:
+*** Type: Period of Time
+*** Start Time: 7:30PM (19:30)
+*** Duration: 180 mins
+*** Day(s) of week: Everyday
+*** One Time Per Day: Yes
+** Device(s) condition:
+*** Detect people appearance on the balcony
+* *Action:*
+** Device(s) action:
+*** Turning on balcony light
+
+Sample request:
+[source,json]
+----
+{
+  "id": "balcony_light_automation_id",
+  "name:": "Balcony Light",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 2, // Period of Time
+        "start_hour": 19,
+        "start_minute": 30,
+        "duration": 180,
+        "is_one_time_per_day": true, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [
+      {
+        "id": "motion_id",
+        "attributes": {
+          "motion.value": 1
+        }
+      }
+    ],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "balcony_light_id",
+        "duration": 0,
+        "start_actions": [
+          {
+            "id": "balcony_light_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 3*
+Set up schedule for turning on storage room light for 15 minutes if there are people inside anytime any day
+
+* *Condition:*
+** Time condition:
+*** Type: Any Time
+*** Day(s) of week: Everyday
+*** One Time Per Day: No
+** Device(s) condition:
+*** Detect people appearance in the storage room
+* *Action:*
+** Device(s) action:
+*** Turning on storage room light for 15 minutes
+
+Sample request:
+[source,json]
+----
+{
+  "id": "balcony_light_automation_id",
+  "name:": "Balcony Light",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 3, // Any Time
+        "start_hour": 0,
+        "start_minute": 0,
+        "duration": 0,
+        "is_one_time_per_day": false, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [
+      {
+        "id": "motion_id",
+        "attributes": {
+          "motion.value": 1
+        }
+      }
+    ],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "storage_room_light_id",
+        "duration": 15,
+        "start_actions": [
+          {
+            "id": "storage_room_light_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[
+            {
+            "id": "storage_room_light_endpoint_id",
+            "attributes": {
+              "on_off.value": false
+            }
+          }          
+        ]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 4*
+Set up schedule for pumping the water to the garden everyday from 7AM to 7:30AM
+
+* *Condition:*
+** Time condition:
+*** Type: Specific Time
+*** Time: 7AM (7:00)
+*** Day(s) of week: Everyday
+*** One Time Per Day: Yes
+* *Action:*
+** Device(s) action:
+*** Start water pump machine for 30 minutes
+
+Sample request:
+[source,json]
+----
+{
+  "id": "pump_water_automation_id",
+  "name:": "Pump Water",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 1, // Specific Time
+        "start_hour": 7,
+        "start_minute": 0,
+        "duration": 0,
+        "is_one_time_per_day": true, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "pumper_id",
+        "duration": 30,
+        "start_actions": [
+          {
+            "id": "pumper_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[
+          {
+            "id": "pumper_endpoint_id",
+            "attributes": {
+              "on_off.value": false
+            }
+          }
+        ]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 5*
+Turn on light when open the door
+
+* *Condition:*
+** Time condition:
+*** Type: Any Time
+*** Day(s) of week: Everyday
+*** One Time Per Day: No
+** Device(s) condition:
+*** Door opened
+* *Action:*
+** Device(s) action: 
+*** Turn on room light
+
+Sample request:
+[source,json]
+----
+{
+  "id": "turn_on_light_automation_id",
+  "name:": "Turn On Light",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 1, // Specific Time
+        "start_hour": 0,
+        "start_minute": 0,
+        "duration": 0,
+        "is_one_time_per_day": false, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [
+      {
+        "id": "door_sensor_id",
+        "end_points" : [
+          {
+            "id": "door_sensor_endpoint_id",
+            "attributes": {
+              "door_sensor.value": 0
+            }
+          }
+        ]
+      }
+    ],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "room_light_id",
+        "duration": 0,
+        "start_actions": [
+          {
+            "id": "room_light_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 6*
+Turn on siren when house is armed at night and the door is opened
+
+* *Condition:*
+** Time condition:
+*** Type: Period of Time
+*** Time: 11:00PM (23:00)
+*** Duration: 360 mins
+*** Day(s) of week: Everyday
+*** One Time Per Day: No
+** Security condition:
+*** House is armed
+** Device(s) condition:
+*** Door is opened
+* *Action:*
+** Device(s) action:
+*** Turn on siren
+
+Sample request:
+[source,json]
+----
+{
+  "id": "security_automation_id",
+  "name:": "Security",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 2, // Period of Time
+        "start_hour": 23,
+        "start_minute": 00,
+        "duration": 360,
+        "is_one_time_per_day": false, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [
+      {
+        "id": "door_sensor_id",
+        "end_points" : [
+          {
+            "id": "door_sensor_endpoint_id",
+            "attributes": {
+              "door_sensor.value": 0
+            }
+          }
+        ]
+      }
+    ],
+    "location_mode": {},
+    "security_mode": {
+      "armed_id": "house_armed_id"
+    }
+  },
+  "actions": {
+    "devices": [
+      {
+        "id": "siren_id",
+        "duration": 0,
+        "start_actions": [
+          {
+            "id": "siren_endpoint_id",
+            "attributes": {
+              "on_off.value": true
+            }
+          }
+        ],
+        "end_actions":[]
+      }
+    ],
+    "scene": {
+      "scene_id": ""
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----
+
+=== *Scenario 7*
+Run scene that turns off lights, air conditioner and arms house at 7AM everyday
+
+* *Condition:*
+** Time condition:
+*** Type: Specific Time
+*** Time: 7:00AM (7:00)
+*** Day(s) of week: Everyday
+*** One Time Per Day: Yes
+* *Action:*
+** Scene action:
+*** Run scene that turns off lights, air conditioner and arms house
+
+Sample request:
+[source,json]
+----
+{
+  "id": "security_scene_id",
+  "name:": "Security Scene",
+  "enable": true,
+  "conditions": {
+    "time": {
+      {
+        "type": 1, // Specific Time
+        "start_hour": 7,
+        "start_minute": 00,
+        "duration": 0,
+        "is_one_time_per_day": true, 
+        "days_of_weeks": [0, 1, 2, 3, 4, 5, 6,] //Everyday
+      } 
+    },
+    "device_status": [],
+    "location_mode": {},
+    "security_mode": {}
+  },
+  "actions": {
+    "devices": [],
+    "scene": {
+      "scene_id": "security_scene_id"
+    },
+    "notify": {},
+    "security_mode": {
+      "armed_id": ""
+    }
+  }
+}
+----

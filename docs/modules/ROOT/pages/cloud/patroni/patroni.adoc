@@ -1,0 +1,409 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *PostgreSQL HA with Patroni*
+:toc: left
+
+== *Overview*
+
+Patroni is an open source tool that can be used for creating and managing your own customized, high-availability cluster for PostgreSQL with Python. It can be used to handle tasks such as replication, backups and restorations. Patroni also provides an HAProxy configuration, giving your application a single endpoint for connecting to the cluster's leader. If you are looking to quickly deploy HA PostgreSQL cluster in the data center, then Patroni is definitely worth considering.
+
+In this tutorial, we will be configuring a highly available PostgreSQL cluster using Patroni with *Ubuntu 20.04*, *PostgreSQL 12*, *Etcd as Distribution Configuration Store* and *HA Proxy*.
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|05/11/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *Setup Environment*
+
+
+|===
+|Instance |Application |IP Address
+
+|DB Node 1
+|Postgres + Patroni
+|192.168.1.198
+
+|DB Node 2
+|Postgres + Patroni
+|192.168.1.199
+
+|DB Node 3
+|Postgres + Patroni
+|192.168.1.200
+
+|Proxy Node
+|HA Proxy + Etcd
+|192.168.1.197
+|===
+
+== *Update /etc/hosts*
+=== *DB Node 1*
+[source,text]
+----
+sudo nano /etc/hosts
+----
+[source,text]
+----
+127.0.0.1 localhost node1
+192.168.1.198 node1
+192.168.1.199 node2
+192.168.1.200 node3
+192.168.1.197 node_proxy
+----
+
+=== *DB Node 2*
+[source,text]
+----
+sudo nano /etc/hosts
+----
+[source,text]
+----
+127.0.0.1 localhost node2
+192.168.1.198 node1
+192.168.1.199 node2
+192.168.1.200 node3
+192.168.1.197 node_proxy
+----
+
+=== *DB Node 3*
+[source,text]
+----
+sudo nano /etc/hosts
+----
+[source,text]
+----
+127.0.0.1 localhost node3
+192.168.1.198 node1
+192.168.1.199 node2
+192.168.1.200 node3
+192.168.1.197 node_proxy
+----
+
+=== *Proxy Node*
+[source,text]
+----
+sudo nano /etc/hosts
+----
+[source,text]
+----
+127.0.0.1 localhost node_proxy
+192.168.1.198 node1
+192.168.1.199 node2
+192.168.1.200 node3
+192.168.1.197 node_proxy
+----
+
+== *Install Etcd*
+On *Proxy Node*
+
+Install ectd
+[source,text]
+----
+sudo apt-get install etcd -y
+----
+
+Modified the Etcd configuration
+[source,text]
+----
+sudo nano /etc/default/etcd
+----
+Add the following lines:
+[source,text]
+----
+ETCD_LISTEN_PEER_URLS="http://192.168.1.197:2380,http://127.0.0.1:2380"
+ETCD_LISTEN_CLIENT_URLS="http://192.168.1.197:2379,http://127.0.0.1:2379"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="http://192.168.1.197:2380"
+ETCD_INITIAL_CLUSTER="sw-ubuntu=http://192.168.1.197:2380,"
+ETCD_ADVERTISE_CLIENT_URLS="http://192.168.1.197:2379"
+----
+
+Restart Etcd
+[source,text]
+----
+sudo systemctl restart etcd
+----
+
+Run etcd on Ubuntu with systemd
+[source,text]
+----
+sudo systemctl enable etcd
+----
+
+== *Install PostgreSQL 12*
+Repeat all the below steps on *DB Node1,2,3*
+
+Install PostgreSQL
+[source,text]
+----
+sudo apt-get install postgresql -y
+----
+
+Stop PostgreSQL
+[source,text]
+----
+sudo systemctl stop postgresql
+----
+
+Disable PostgreSQL on systemd
+[source,text]
+----
+sudo systemctl disable postgresql
+----
+
+== *Install Patroni*
+Repeat all the below steps on *DB Node1,2,3*
+
+Install Patroni
+[source,text]
+----
+sudo apt-get install python3-pip python3-dev libpq-dev
+sudo -H pip3 install --upgrade pip
+pip install patroni
+pip install python-etcd
+pip install psycopg2-binary
+----
+
+Create Patroni Data & Log Directory
+[source,text]
+----
+sudo mkdir -p /data/patroni
+sudo chown -R postgres:postgres /data/patroni
+sudo chmod -R 700 /data/patroni
+
+sudo mkdir -p /var/log/patroni
+sudo chown -R postgres:postgres /var/log/patroni
+sudo chmod -R 700 /var/log/patroni
+----
+
+Modified the Patroni configuration
+[source,text]
+----
+sudo nano /etc/patroni.yml
+----
+Add the following lines:
+[source,text]
+----
+scope: pg_cluster
+name: node1
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: node1:8008
+
+etcd:
+  host: node_etcd:2379
+
+bootstrap:
+  # this section will be written into Etcd:/<namespace>/<scope>/config after initializing new cluster
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+#    primary_start_timeout: 300
+#    synchronous_mode: false
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        wal_level: replica
+        hot_standby: "on"
+        logging_collector: 'on'
+        max_wal_senders: 5
+        max_replication_slots: 5
+        wal_log_hints: "on"
+        #archive_mode: "on"
+        #archive_timeout: 600
+        #archive_command: "cp -f %p /home/postgres/archived/%f"
+        #recovery_conf:
+        #restore_command: cp /home/postgres/archived/%f %p
+
+  # some desired options for 'initdb'
+  initdb:  # Note: It needs to be a list (some options need values, others are switches)
+  - encoding: UTF8
+  - data-checksums
+pg_hba:  # Add following lines to pg_hba.conf after running 'initdb'
+  - host all all 0.0.0.0/0 md5
+  - host all all 127.0.0.1/0 md5
+  - host all all 192.168.1.0/24 md5
+  - host all all 192.168.1.197/32 trust
+  - host replication replicator 127.0.0.1/32 trust
+  - host replication replicator 0.0.0.0/32 trust
+  - host replication replicator 192.168.1.0/24 md5
+#  - hostssl all all 0.0.0.0/0 md5
+
+  # Additional script to be launched after initial cluster creation (will be passed the connection URL as parameter)
+# post_init: /usr/local/bin/setup_cluster.sh
+  # Some additional users users which needs to be created after initializing new cluster
+  users:
+    admin:
+      password: admin
+      options:
+        - createrole
+        - createdb
+    replicator:
+      password: password
+      options:
+        - replication
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: node1:5432
+  data_dir: "/data/patroni"
+  bin_dir: "/usr/lib/postgresql/12/bin"
+#  config_dir:
+  pgpass: /tmp/pgpass0
+  authentication:
+    replication:
+      username: replicator
+      password: password
+    superuser:
+      username: postgres
+      password: password
+  parameters:
+    unix_socket_directories: '/var/run/postgresql'
+
+#watchdog:
+#  mode: required # Allowed values: off, automatic, required
+#  device: /dev/watchdog
+#  safety_margin: 5
+
+tags:
+    nofailover: false
+    noloadbalance: false
+    clonefrom: false
+    nosync: false
+
+log:
+  dir: /var/log/patroni
+  level: DEBUG
+----
+*Note*: Replace *note1* by correct hostname for each DB Node.
+
+*Patroni Systemd Startup Service*
+
+Create file /etc/systemd/system/patroni.service
+
+Add following lines:
+[source,text]
+----
+[Unit]
+Description=Runners to orchestrate a high-availability PostgreSQL
+After=syslog.target network.target
+
+[Service]
+Type=simple
+
+User=postgres
+Group=postgres
+
+ExecStart=/usr/local/bin/patroni /etc/patroni.yml
+
+KillMode=process
+
+TimeoutSec=30
+
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+----
+
+Enable Patroni on systemd
+[source,text]
+----
+sudo systemctl enable patroni
+----
+
+Start Patroni & Check Status
+[source,text]
+----
+sudo systemctl start patroni
+sudo systemctl status patroni
+----
+
+== *Install HA Proxy*
+On *Proxy Node*
+
+Install haproxy
+[source,text]
+----
+sudo apt-get install haproxy -y
+----
+
+Enable HA Proxy on systemd
+[source,text]
+----
+sudo systemctl enable haproxy
+----
+
+Modified the HA Proxy configuration
+[source,text]
+----
+sudo nano /etc/haproxy/haproxy.cfg
+----
+Add the following lines:
+[source,text]
+----
+global
+    maxconn 100
+
+defaults
+    log global
+    mode tcp
+    retries 2
+    timeout client 30m
+    timeout connect 4s
+    timeout server 30m
+    timeout check 5s
+
+listen stats
+    mode http
+    bind *:7000
+    stats enable
+    stats uri /
+
+listen cluster-a-leader
+    bind *:5000
+    option httpchk OPTIONS /master
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+    server node1 node1:5432 maxconn 100 check port 8008 inter 1s
+    server node2 node2:5432 maxconn 100 check port 8008 inter 1s
+    server node3 node3:5432 maxconn 100 check port 8008 inter 1s
+
+listen cluster-a-replicas
+    bind *:5001
+    option httpchk OPTIONS /replica
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+    server node1 node1:5432 maxconn 100 check port 8008 inter 1s
+    server node2 node2:5432 maxconn 100 check port 8008 inter 1s
+    server node3 node3:5432 maxconn 100 check port 8008 inter 1s    
+----
+
+
+
+Restart HA Proxy
+[source,text]
+----
+sudo systemctl restart haproxy
+----
+Open your web browser and type the URL http://192.168.1.197:7000 to monitor Cluster nodes
+
+:imagesdir: ../../../assets/images
+image::app/haproxy.jpg[image]

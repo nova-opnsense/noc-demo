@@ -1,0 +1,124 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Device API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - Voice Service Interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|28/04/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/device_model.adoc[]
+
+== *Thing Service - Voice Service Interface*
+
+=== *Device List*:
+
+==== *Message Interface*:
+
+*Device List Request*:
+
+- *Topic*: _vs/event/VS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "vs.ts.device.list.requested",
+  "scope": "device",
+  "source": "vs",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "VS_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Device List Response*:
+
+- *Topic*: _ts/event/VS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.vs.device.list.responded",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "HOME_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+=== *Device State Change*:
+
+==== *Message Interface*:
+
+*State Change Request*:
+
+- *Topic*: _vs/event/VS_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "vs.ts.device.state.updated",
+  "scope": "device",
+  "source": "vs",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "VS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+- *Notes*: The endpoint state will contains only updated attributes.

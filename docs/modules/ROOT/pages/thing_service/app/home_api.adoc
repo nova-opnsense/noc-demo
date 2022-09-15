@@ -1,0 +1,305 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Home API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|02/03/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|13/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/home_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Home Data*:
+
+==== *Sequence Diagram*:
+[plantuml, "home_data_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Request Home Data.
+ThingService -> ThingService: Check Admin.
+alt Exist Admin case
+ThingService -> ThingService: Validate User.
+ThingService --> App: Home Info.
+ThingService --> App: User List.
+ThingService --> App: Device List.
+ThingService --> App: Other Info...
+else No Admin case
+autonumber 3 1
+ThingService --> App: Home Un-Configured.
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Request Home Data*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.home.data.requested",
+  "scope": "home",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "USER_ID",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <null>
+}
+----
+
+*Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Data*:
+  . Home Info
+  . User Info List
+  . Zone Info List
+  . Scene Info List
+  . Device InfoList
+
+=== *Rquest Home*:
+
+==== *Message Interface*:
+
+*Request Home*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.home.requested",
+  "scope": "home",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "USER_ID",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Response Home*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.home.responded",
+  "scope": "home",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <home_structure>
+  }
+}
+----
+
+=== *Update Home*:
+
+==== *Message Interface*:
+
+*Request Update Home*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.home.updated",
+  "scope": "home",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "USER_ID",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <home_structure>
+  }
+}
+----
+
+*Response Home Update*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.home.updated",
+  "scope": "home",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <home_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "home",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Change Security Mode*:
+
+==== *Message Interface*:
+
+*Change Security Mode Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.home.security_mode.updated",
+  "scope": "home",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "USER_ID",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "security_mode": <string>, //security mode id
+  }
+}
+----
+
+*Home Update Notify*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.home.updated",
+  "scope": "home",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <home_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "home",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

@@ -1,0 +1,521 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *User API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|02/03/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|10/05/2022
+|Nga Le
+|1.2
+|Add set user credential.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/user_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Create Admin*:
+
+==== *Sequence Diagram*:
+[plantuml, "create_admin_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Create Admin.
+ThingService -> ThingService: Check Admin.
+alt successful case
+ThingService -> ThingService: Create Admin.
+ThingService --> App: Admin Info.
+else fail case
+autonumber 3 1
+ThingService --> App: Authorization Error.
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Request Create Admin*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.admin.created",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "email": <string>
+  }
+}
+----
+
+*Create Success*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.admin.created",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+=== *Set User Credential*:
+
+==== *Sequence Diagram*:
+[plantuml, "set_user_credential_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Set User Credential.
+ThingService -> ThingService: Check User Credential.
+alt successful case
+ThingService -> ThingService: Update User Credential.
+ThingService --> App: Admin Info.
+else fail case
+autonumber 3 1
+ThingService --> App: Set User Credential Error.
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Set User Credential Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.credential.updated",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "token": {
+      "expiration": 1652255614360,
+      "access_token": "ACCESS_TOKEN",
+      "refresh_token": "REFRESH_TOKEN",
+      "token_end_point": "TOKEN_ENDPOINT_URL"
+    },
+    "end_point_urls": {
+      "jwks_url": "JWKS_URL",
+      "regis_url": "REGIS_URL"
+    },
+    "client_credential": {
+      "client_id": "CLIENT_ID",
+      "client_secret": "CLIENT_SECRET"
+    }
+  }
+}
+----
+
+- *Note*: This api is restricted, It's only able to call when home is not connected to cloud.
+
+*Set Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.credential.updated",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+- *Note*: An *Home Updated* event will be published after this event.
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *User List*:
+
+==== *Message Interface*:
+
+*User List Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.list.requested",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*User List Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.list.responded",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "users": [
+      <user_structure>,
+      <user_structure>,
+      <user_structure>
+    ]
+  }
+}
+----
+
+=== *Create User*:
+
+==== *Message Interface*:
+
+*Request Create User*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.created",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Create Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.created",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+=== *Update User*:
+
+==== *Message Interface*:
+
+*Request Update User*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.updated",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Update Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.updated",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----
+
+
+=== *Delete User*:
+
+==== *Message Interface*:
+
+*Request Delete User*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.user.deleted",
+  "scope": "user",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Delete Success*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.user.deleted",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <user_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "user",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

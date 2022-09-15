@@ -1,0 +1,271 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Noti Service*
+:toc: left
+
+== *Overview*
+
+- API Structure.
+- Noti Service APIs.
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|06/11/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *API Structure*
+
+=== *Request structure*
+
+- *Endpoint Url*: _https://NOTI_SERVICE:PORT/PATH_
+- *Method*: GET, POST, PUT, DELETE (defined specifically for each API)
+- *Header*:
+
+|===
+|Key |Value
+
+|Content-Type
+|application/jsoN
+
+|Authorization
+|Bearer JWT_TOKEN
+|===
+
+- *Body*: payloads defined specifically for each API
+
+=== *Response  structure*
+
+- *HTTP response status*: 200, success; otherwise, will fail
+
+|===
+|Status Code |Description
+
+|200
+|Success
+
+|400
+|Bad Request
+
+|401
+|Unauthorized
+
+|403
+|Forbidden
+
+|404
+|Not Found
+
+|500
+|Internal Server Error
+
+|503
+|Service Unavailable
+|===
+
+- *Body*:
+
+*Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"data": {
+		//defined specifically for each API
+	}
+}
+----
+
+*Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+== *Data Models*
+
+=== *App Token Model*
+[source,json]
+----
+{
+    "token": <string>, // Firebase token
+    "home_id": <string>,
+    "user_id": <string>,
+    "device_id": <string>,
+    "info": {
+        // key, value
+    }
+}
+----
+
+== *APIs*
+
+=== *Registration Token*
+
+==== *Sequence*
+
+[plantuml,"register_app_token_sequence",png]
+----
+@startuml
+autonumber
+MobileApp -> NotiService: Register App Token\n with AuthenInfo
+NotiService -> NotiService: Validate AuthenInfo
+alt authen case
+NotiService -> RegisService: Validate User/Home Permission
+RegisService -> RegisService: Check Permission
+
+alt has-permission case
+RegisService --> NotiService: Has Permission Response
+NotiService -> NotiService: Store App Token
+NotiService --> MobileApp: Return Ok Response
+else no-permission case
+autonumber 5 1
+RegisService --> NotiService: Return No-Permission Error
+NotiService --> MobileApp: Return No-Permission Error
+end
+
+else un-authen case
+autonumber 3 1
+NotiService --> MobileApp: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _POST_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/app-tokens/register_
+
+- *Payload*:
+
+    <App_Token_Model>
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": <string> // token
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+== *Message Template*
+|===
+|Event |vi|en
+
+|DoorSensorOpened
+|${device_name} tại khu vực ${zone_name} vừa mở.
+|${device_name} at zone ${zone_name} just opened.
+
+|DoorSensorClosed
+|${device_name} tại khu vực ${zone_name} vừa đóng.
+|${device_name} at zone ${zone_name} just closed.
+
+|MotionCleared
+|${device_name} tại khu vực ${zone_name} không còn chuyển động.
+|${device_name} at zone ${zone_name} detected no motion.
+
+|MotionDetected
+|${device_name} tại khu vực ${zone_name} vừa phát hiện chuyển động.
+|${device_name} at zone ${zone_name} just detected motion.
+
+|SmokeCleared
+|${device_name} tại khu vực ${zone_name} không còn khói.
+|${device_name} at zone ${zone_name} detected no smoke.
+
+|SmokeDetected
+|${device_name} tại khu vực ${zone_name} vừa phát hiện khói.
+|${device_name} at zone ${zone_name} just detected smoke.
+
+|TemperatureChanged
+|Nhiệt độ tại khu vực ${zone_name} vừa thay đổi thành ${temperature.value}°C đo bởi ${device_name}.
+|Temperature at zone ${zone_name} just changed to ${temperature.value}°C reported by ${device_name}.
+
+|HumidityChanged
+|Độ ẩm tại khu vực ${zone_name} vừa thay đổi thành ${humidity.value}% đo bởi ${device_name}.
+|Humidity at zone ${zone_name} just changed to ${humidity.value}% reported by ${device_name}.
+
+|IlluminanceChanged
+|Cường độ sáng tại khu vực ${zone_name} vừa thay đổi thành ${illuminance.value} Lux đo bởi ${device_name}.
+|Illuminance at zone ${zone_name} just changed to ${illuminance.value} Lux reported by ${device_name}.
+
+|Pm25Changed
+|Pm 2.5 tại khu vực ${zone_name} vừa thay đổi thành ${pm_25.value} đo bởi ${device_name}.
+|Pm 2.5 at zone ${zone_name} just changed to ${pm_25.value} reported by ${device_name}.
+
+|CoChanged
+|Nồng độ CO tại khu vực ${zone_name} vừa thay đổi thành ${co.value} đo bởi ${device_name}.
+|CO Levels at zone ${zone_name} just changed to ${co.value} reported by ${device_name}.
+
+|Co2Changed
+|Nồng độ CO2 tại khu vực ${zone_name} vừa thay đổi thành ${co2.value} đo bởi ${device_name}.
+|CO2 Levels at zone ${zone_name} just changed to ${co2.value} reported by ${device_name}.
+
+|BatteryLow
+|Pin của ${device_name} tại khu vực ${zone_name} yếu.
+|Battery of ${device_name} at zone ${zone_name} is low.
+
+|SceneTriggered
+|Ngữ cảnh ${scene_name} vừa được kích hoạt bởi ${user_name}.
+|Scene ${scene_name} just activated by ${user_name}.
+
+|SecurityModeChanged
+|Thiết lập an ninh được đặt thành ${security_mode_name}.
+
+Thiết lập an ninh được đặt thành ${security_mode_name} bởi ${user_name}.
+|Security mode is set to ${security_mode_name}.
+
+Security mode is set to ${security_mode_name} by ${user_name}.
+
+|UserControl
+|${device_name} tại khu vực ${zone_name} được điều khiển bởi ${user_name}.
+|${device_name} at zone ${zone_name} is controlled by ${user_name}.
+
+|CloudConnected
+|-
+|-
+
+|CloudDisconnected
+|-
+|-
+|===

@@ -1,0 +1,104 @@
+[
+    {
+        "name": "ssh",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "aloha",
+                "port_range": "22:22",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    },
+    {
+        "name": "broker",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "",
+                "port_range": "8883:8883",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    },
+    {
+        "name": "broker-bridge",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "",
+                "port_range": "1884:1884",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    },
+    {
+        "name": "web",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "",
+                "port_range": "8100:8101",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    },
+    {
+        "name": "old_web",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "",
+                "port_range": "80:80",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            },
+            {
+                "id": "",
+                "name": "",
+                "port_range": "8080:8080",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            },
+            {
+                "id": "",
+                "name": "",
+                "port_range": "9010",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    },
+    {
+        "name": "fts",
+        "port_profiles": [
+            {
+                "id": "",
+                "name": "",
+                "port_range": "9000:9000",
+                "ip_mask": "192.168.0.0/16",
+                "protocol": "tcp",
+                "interface": "",
+                "enable": true
+            }
+        ]
+    }
+]

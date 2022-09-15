@@ -1,0 +1,19 @@
+{
+    "mesh_name": "Nova Mesh",
+    "type": "SON",
+    "rssi_threshhold": {
+      "up": 100,
+      "down": 80
+    },
+    "antenna_installed": {
+      "up": true,
+      "down": true
+    },
+    "work_mode": "standalone",
+    "wireless": {
+      "wifi_iface": {
+        "ssid": "NVL_HUB_2.4G_123123123",
+        "key": "1234567890"
+      }
+    }
+}

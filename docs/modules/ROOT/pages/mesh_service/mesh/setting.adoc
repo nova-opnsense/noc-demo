@@ -1,0 +1,477 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Setting*
+:toc: left
+
+:pic:       Tho Do
+
+== *Overview*
+
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|Create Mesh
+|Create Mesh System from Standalone or Agent Mode to Controller Mode
+
+|{counter:feature}
+|Request Mesh
+|Get Mesh Setting from Mesh system
+
+|{counter:feature}
+|Update Mesh
+|Update Mesh setting (ssid, key, ... propertise)
+
+|{counter:feature}
+|Delete Mesh
+|Switch Hub to Standalone
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+| 01/07/2022
+|{pic}
+| 1.0.1
+|Mesh-Settting
+
+| 06/07/2022
+|{pic}
+| 2.0.0
+| Update API Struct (Mesh Setting)
+
+| 01/08/2022
+|{pic}
+| 2.0.1
+| Update Sequence Diagram
+
+|===
+
+
+== *Data model*
+
+
+=== *Mesh Setting Structure*
+
+[source,json]
+----
+{
+    "mesh_name": <string><not null>,
+    "type": <string><NULL><fixed><not set>,
+    "rssi_threshhold":
+    {
+        "up": <int><positive><default: 100>,
+        "down": <int><positive><default: 80>
+    },
+    "antenna_installed":
+    {
+        "up": <bool><default: true>,
+        "down": <bool><default: true>
+    },
+    "backhaul_channel": <string><default: "100">,
+    "active_time_after_set": <int><positive><default: 60>,
+    "work_mode": <string><default NULL>,
+    "weight_mesh": <int><positive><default 4>,
+    "mesh_link_connection": <string><default "auto">,
+    "minimum_mesh_link_snr": <int><default: 24>,
+    "wireless":
+    {
+        "wifi_iface":
+        {
+            "ssid": <string><not null>,
+            "key": <string><not null><greater than 8char>
+        }
+    }
+}
+----
+== *API*
+=== *Create Mesh*
+==== Flow
+[plantuml, "create_mesh_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Request Mesh.
+alt mesh exist case
+Ezm --> Web: Return Mesh Setting.
+else mesh not exist case
+autonumber 2 1
+Ezm --> Web: Return Null Data.
+Web --> Ezm: Create Mesh.
+Ezm -> Ezm: Setup Mesh Controller for Hub.
+alt success case
+Ezm --> Web: Return Mesh Setting.
+else failed case
+autonumber 6 1
+Ezm --> Web: Return Mesh Error.
+end
+end
+@enduml
+----
+
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.created",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data": <mesh_setting_structure>,
+    "created_time": <int>
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.created",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{
+        "error":
+        {
+            "code": <int>,
+            "message": <string>
+        },
+        "data":<mesh_setting_structure>
+    },
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Create Mesh Success
+
+|240001
+|Wrong Data Message Format
+
+|240004
+|Mesh is setuped before
+
+|240006
+|Request name invalid
+
+|===
+
+=== *Request Mesh*
+
+==== Flow
+[plantuml, "request_mesh_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Request Mesh.
+alt mesh exist case
+Ezm --> Web: Return Mesh Setting.
+else mesh not exist case
+autonumber 2 1
+Ezm --> Web: Return Null Data.
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.responded",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{
+        "error":
+        {
+            "code": <int>,
+            "message": <string>
+        },
+        "data":<mesh_setting_structure>,
+    }
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|240007
+|Dont have Mesh Before, Need to create Mesh
+
+|===
+
+=== *Update Mesh*
+==== Flow
+[plantuml, "update_mesh_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Update Mesh Request.
+alt mesh exist case
+Ezm -> Ezm:  Update Mesh with Mesh Data
+Ezm --> Web: Return Mesh Data
+else mesh not exist case
+autonumber 2 1
+Ezm --> Web: Return Mesh Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.updated",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data": <mesh_setting_structure> ,
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.updated",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{
+        "error":
+        {
+            "code": <int>,
+            "message": <string>
+        },
+        "data":<mesh_setting_structure>
+    },
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240005
+|Mismatched Mesh ID
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before, need to creat Mesh
+
+|===
+
+=== *Delete Mesh*
+==== Flow
+[plantuml, "delete_mesh_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Delete Mesh Request.
+alt mesh exist case
+Ezm -> Ezm:  Delete Mesh in Controller
+Ezm --> Web: Return Success
+else mesh not exist case
+autonumber 2 1
+Ezm --> Web: Return Mesh Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.deleted",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<mesh_setting_structure>,
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.deleted",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{
+        "error":
+        {
+            "code": <int>,
+            "message": <string>
+        },
+        "data":<mesh_setting_structure>
+    },
+    "created_time": <int>
+}
+----
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240005
+|Mismatch Mesh ID
+
+|240006
+|Request name invalid
+
+|240007
+|Dont have Mesh before, need to create Mesh
+
+|===
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240002
+|Pair Fail
+
+|240003
+|Device Not Found
+
+|240004
+|Mesh is Setuped Before
+
+|240005
+|Mesh not found
+
+|240006
+|Request name invalid
+
+|240007
+|Easymesh Deamon connect fail
+
+|===
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Create Mesh.
+* [x] Request Mesh.
+* [x] Update Mesh.
+* [x] Delete Mesh.
+

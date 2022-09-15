@@ -1,0 +1,28 @@
+pipeline {
+    agent { 
+        docker { 
+            image 'node:16' 
+            args '-u root --privileged'
+        } 
+    }
+    environment {
+        NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+        HOME = '.'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'npm i --location=global @antora/cli@3.0.0 @antora/site-generator@3.0.0'
+                sh 'npm i --location=global asciidoctor asciidoctor-plantuml'
+                sh 'antora playbook.yml'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sshagent(['87b35f4f-cde9-4f59-acfa-2fdf64353de4']) {
+                    sh 'scp -r -o StrictHostKeyChecking=no build cloud@192.168.1.215:~/ '
+                }
+            }
+        }
+    }
+}

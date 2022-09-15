@@ -1,0 +1,617 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Device API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Service - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|09/02/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/02/2022
+|Nga Le
+|1.1
+|Update device API.
+
+|12/04/2022
+|Nga Le
+|1.2
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/device_model.adoc[]
+
+== *Thing Service - App interface*
+
+=== *Join Device*:
+
+==== *Sequence Diagram*:
+[plantuml, "join_device_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Request Join Device
+ThingService --> HubService: Request Join Device
+HubService -> HubService: Wait for new device
+alt successful case
+HubService --> ThingService: Register Device Request
+ThingService -> ThingService: Register Device
+ThingService --> HubService: Register Device Response
+HubService -> HubService: Store Device Info
+HubService --> ThingService: Device Joined
+ThingService --> App: New Device
+else timeout case
+autonumber 4 1
+HubService --> ThingService: Request Timeout
+ThingService --> App: Request Timeout
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Request Join Device*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.join.requested",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "hub_id": <string>,
+    "protocol": <string>,
+    "data": {
+      //any required data for adding new device
+    }
+  }
+}
+----
+
+*New Device*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.joined",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Join Timeout*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.join.timeout",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "hub_id": <string>,
+    "protocol": <string>
+  }
+}
+----
+
+=== *Remove Device*:
+
+==== *Sequence Diagram*:
+[plantuml, "remove_device_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Remove Request
+ThingService --> HubService: Remove Request
+HubService -> HubService: Remove Device
+alt successful case
+HubService --> ThingService: Device Left Request
+ThingService -> ThingService: Remove Device
+ThingService --> HubService: Device Left Response
+ThingService --> App: Notify Device Left
+else timeout case
+App -> App: Remove Timeout
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Request Remove Device*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.remove.requested",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Notify Device Left*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.left",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device State Change*:
+
+==== *Message Interface*:
+
+*State Change Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.state.updated",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+- *Notes*: The endpoint state will contains only updated attributes.
+
+*State Change Notify*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.state.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device List*:
+
+==== *Message Interface*:
+
+*Device List Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.list.requested",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": <NULL>
+}
+----
+
+*Device List Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.list.responded",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+*Device List Notify*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.list.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "devices": [
+      <device_structure_1>,
+      <device_structure_2>,
+      <device_structure_3>
+    ]
+  }
+}
+----
+
+=== *Device Update*:
+
+==== *Message Interface*:
+
+*Device Update Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.profile.updated",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Device Update Notify*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.profile.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Device Setting*:
+
+==== *Sequence Diagram*:
+
+[plantuml, "device_setting_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Change Device Setting
+ThingService --> HubService: Device Setting Request
+HubService -> HubService: Update Device Setting
+alt successful case
+HubService --> ThingService: Device Setting Response
+ThingService -> ThingService: Update Device Setting
+ThingService --> App: Notify Device Update
+else fail case
+autonumber 4 1
+HubService --> ThingService: Device Setting Failed
+ThingService --> App: Notify Setting Failed
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Device Setting Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.setting.updated",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Setting Success Response*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.setting.updated",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Setting Failed Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.setting.failed",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+=== *Create Virtual Device*:
+
+==== *Sequence Diagram*:
+
+[plantuml, "device_create_sequence", png]
+----
+@startuml
+autonumber
+App --> ThingService: Create Virtual Device
+ThingService -> ThingService: Generate Virtual Device
+alt successful case
+ThingService -> ThingService: Store Virtual Device
+ThingService --> App: Notify New Virtual Device
+else fail case
+autonumber 3
+ThingService --> App: Notify Create Device Failed
+end
+@enduml
+----
+
+==== *Message Interface*:
+
+*Create Virtual Device Request*:
+
+- *Topic*: _app/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.ts.device.virtual.created",
+  "scope": "device",
+  "source": "app",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+- *Notes*: The *id* field in the new virtual device should be an empty string.
+
+*Create Success Response*:
+
+- *Topic*: _ts/event/HOME_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.app.device.virtual.created",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <device_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Topic*: _ts/event/APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "ts.error.responded",
+  "scope": "device",
+  "source": "ts",
+  "home_id": "HOME_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <error_structure>
+  }
+}
+----

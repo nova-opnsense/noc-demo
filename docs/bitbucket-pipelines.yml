@@ -1,0 +1,16 @@
+#  Template NodeJS build
+
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: node:16
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build & Deploy
+          script:
+            - npm i -g @antora/cli@3.0.0 @antora/site-generator@3.0.0
+            - npm i -g asciidoctor asciidoctor-plantuml
+            - antora playbook.yml

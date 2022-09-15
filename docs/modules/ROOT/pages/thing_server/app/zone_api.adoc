@@ -1,0 +1,287 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Zone API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Server - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|09/04/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|12/04/2022
+|Nga Le
+|1.1
+|Update data structure.
+
+|===
+
+== *Data Structure*
+
+- *Reference*: xref:common/zone_model.adoc[]
+
+== *Thing Server - App interface*
+
+=== *Create Zone*:
+
+==== *Message Interface*:
+
+*Create Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.zone.info.created",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Create Notify*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.zone.info.created",
+  "scope": "zone",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "TS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Error Response*:
+
+- *Subject*: _cs.event.APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.error.responded",
+  "scope": "zone",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "code": <int>,
+    "message": <string>
+  }
+}
+----
+
+=== *Zone Update*:
+
+==== *Message Interface*:
+
+*Update Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.zone.info.updated",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Update Notify*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.zone.info.updated",
+  "scope": "zone",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+=== *Zone Delete*:
+
+==== *Message Interface*:
+
+*Delete Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.zone.info.deleted",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+*Delete Notify*:
+
+- *Subject*: _cs.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.zone.info.deleted",
+  "scope": "zone",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    <zone_structure>
+  }
+}
+----
+
+=== *Zone List*:
+
+==== *Message Interface*:
+
+*Zone List Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "app.zone.list.requested",
+  "scope": "zone",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "APP_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "limit": <int>,
+    "offset": <int>
+  }
+}
+----
+
+*Zone List Response*:
+
+- *Subject*: _cs.event.APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.zone.list.responded",
+  "scope": "zone",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN",
+  "parent_id": "",
+  "client_id": "THING_SERVER_ID",
+  "created_time": 1584501452048,
+  "data": {
+    "limit": <int>,
+    "offset": <int>,
+    "zones": [
+      <zone_structure>,
+      <zone_structure>,
+      <zone_structure>
+    ]
+  }
+}
+----

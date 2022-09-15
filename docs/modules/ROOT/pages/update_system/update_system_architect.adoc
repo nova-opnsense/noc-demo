@@ -1,0 +1,128 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *NIT Update System Architect*
+:toc: left
+
+== *Overview*
+- NIT Update System.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|01/06/2022
+|Nga le
+|1.0
+|Initial update system architect.
+|===
+
+== *Description*
+. The document will includes:
+.. Update system architect design.
+.. Description for cloud components in update system.
+.. Description for smart hub components in update system.
+
+== *NIT Update System Architect*
+
+[plantuml, "update_system_architect", png]
+----
+@startuml
+title: NIT Update System Architect
+
+node "NIT Cloud" {
+  [ID Service] <<http>> as id
+  [Regis Service] <<http>> as rs
+  [Update Service] <<http>> as us
+
+  node "Public Proxy" {
+    [Load Balancer] <<https>> as lb
+
+    lb <.down.> id
+    lb <.down.> rs
+    lb <.left.> us
+  }
+
+  database "PostgreSQL" {
+    [User DB] as db
+    [Regis DB] as rdb
+  }
+
+  database "MinIO" {
+    [Packages] <<buckets>> as store
+  }
+
+  id <.down.> db
+  rs <.down.> rdb
+  us <..down.> store
+}
+
+node "Main Hub" {
+  [Router Web] <<front-ent>> as web
+  [Hub service] <<web-socket>> as hub
+  [Thing Service] <<mqtt>> as ts
+  [MQTT Broker] <<mosquitto>> as broker
+  [Update Service] <<mqtt>> as uas
+
+  uas <-up-> lb
+  web <-left-> lb
+  web <.right.> hub
+  ts <.up.> broker
+  hub <.down.> broker
+  uas <.right.> broker
+}
+@enduml
+----
+
+- *Notes*: This diagram is a simplified version of *NIT Cloud Architect* which only contains required components for update system.
+
+== *Cloud Components*
+
+=== *Public Proxy*
+
+- The public proxy is the only component which is internet facing in NIT update system.
+- This component will expose service APIs from *Update Service*, *ID Service*, and *Regis Service* with TLS encryption.
+
+=== *ID Service*
+
+- The *ID Service* will provide oauth2 for external services to authenticate before requesting service APIs.
+
+=== *Regis Service*
+
+- The *Regis Service* will provide APIs for checking *Home*, *User* and *Permisison* in update system.
+
+=== *Update Service*
+
+- The *Update Service* will handle core functions of update system.
+- This service support upload/download software packages, and backup packages.
+- Provide APIs for listing update packages and backup packages for *Router Web*.
+- Create version updates and hot-fix updates base on user permission, and software configurations.
+- ...
+
+== *Hub Components*
+
+=== *Router Web*
+
+- The *Router Web* provide UI for user to view, create, and restore backup on Main Hub.
+- ...
+
+=== *Hub Service*
+
+- The *Hub Service* will handle backup/restore for Main Hub. The backup/restore will be triggered by *Router Web*.
+
+=== *Thing Service*
+
+- The *Thing Service* will provide cloud info for local *Update Service* to interact with update system on NIT Cloud.
+
+=== *Update Service*
+
+- The *Update Service* on hub will collect software versions and report to NIT Cloud.
+- Handle update software packages request from *Thing Service* or *Update Service* in NIT Cloud.
+- ...

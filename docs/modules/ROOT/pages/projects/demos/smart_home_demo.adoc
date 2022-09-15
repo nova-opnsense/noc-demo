@@ -1,0 +1,138 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Smart Home Demo*
+:toc: left
+
+== *Overview*
+- Requirements.
+- System design.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|25/01/2022
+|Nga Le
+|1.0
+|Initial version.
+
+|26/01/2022
+|Nga Le
+|1.1
+|Add person in charge.
+
+|===
+
+== *Requirements*
+
+=== *Apps*:
+
+. An android application which will be run on a provided tablet.
+
+=== *Devices*:
+. Camera.
+. LED Dimmer.
+. Color Light.
+. On/Off Light.
+. Door Sensor.
+. Environment Sensor.
+
+=== *Demo Cases*:
+. User will able to change color of Color Light.
+. User will able to change state of On/Off Light.
+. User will able to change brightness of LED Dimmer.
+. User will able to see the open/close state of Door Sensor.
+. User will able to see the temperature/humidity/luminance from Environment Sensor.
+. User will able to see the camera live stream from the demo house when interacting with other devices.
+. ...
+
+=== *Time Line*:
+
+- TBD...
+
+== *System Design*
+
+=== *System Diagram*:
+
+[plantuml, "system", png]
+----
+@startuml
+title: Smart Home Demo
+
+cloud "NIT Cloud" {
+  [NATS Server] as nats
+}
+
+node "Hub" {
+  [Hub Service] as hub
+  [Thing Service] as ts
+  [ZigBee Service] as zb
+  [Authen Service] <<https server>> as auth
+
+  node "Broker" as broker {
+    [MQTT Broker] as mqtt
+    [Authen Library] <<shared lib>> as lib
+
+    mqtt -down-> lib
+    lib -right-> auth
+  }
+
+  zb -down-> mqtt
+  ts -down-> auth
+  ts -right-> mqtt
+  hub -down-> auth
+  hub -left-> mqtt
+}
+
+node "AIBox" {
+  [Detection Service] as ds
+
+  ds -up-> mqtt
+  ds -left-> auth
+}
+
+node "Mobile Apps" {
+  [Android Tablet App] as android
+}
+
+ts -up-> nats
+android -up-> nats
+@enduml
+----
+
+=== *Required Services*:
+
+==== *Software Team*:
+. *Thing Service*:
+  - Owner: Nga Le
+  - Description: handle smart home features.
+
+. *Authen Service*:
+  - Owner: Nga Le
+  - Description: handle authenticate for the smart home system.
+
+. *Android Tablet App*:
+  - Owner: Tuan Huynh
+  - Description: support user to interact with devices in the smart home system.
+
+==== *Firmware Team*:
+. *ZigBee Service*:
+  - Owner: Tung Nguyen
+  - Description: handle controlling ZigBee devices.
+
+. *Hub Service*:
+  - Owner: Khoi Nguyen
+  - Description: bridge communication between Thing Service and ZigBee Service.
+
+==== *AI Team*:
+. *Detection Service*:
+  - Owner: Duc Huynh
+  - Description: handle live stream feature from a demo house.

@@ -1,0 +1,129 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *System API*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Thing Server - App interface.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|08/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *Data Structure*
+
+=== *System Info*:
+----
+{
+  "id": <string>,
+  "name":<string>,
+  "address": <string>,
+  "version": <string>,
+  "attributes": {
+    "KEY": VALUE, //any primitive types and string
+  }
+}
+----
+
+== *Thing Server - App interface*
+
+=== *System Info*:
+
+==== *Message Interface*:
+
+*Request System Info*:
+
+- *Subject*: _system.info.request_
+
+- *Payload*: <NULL>
+
+- *Method*: _REQUEST_
+
+- *Response*:
+----
+{
+  "id": "MSG_ID",
+  "name": "Thing Server",
+  "address": "Server Address",
+  "version": "1.0.0",
+  "attributes": {}
+}
+----
+
+
+=== *System Data*:
+
+==== *Message Interface*:
+
+*System Data Request*:
+
+- *Subject*: _app.event.THING_SERVER_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "MSG_ID",
+  "name": "app.system.data.requested",
+  "scope": "system",
+  "source": "app",
+  "home_id": "THING_SERVER_ID",
+  "client_id": "APP_ID",
+  "parent_id": "",
+  "created_time": 1649154258962,
+  "auth_token": "",
+  "data": {
+    //empty
+  }
+}
+----
+
+*System Data Response*:
+
+- *Subject*: _cs.event.APP_ID_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "id": "MSG_ID",
+  "name": "cs.system.data.responded",
+  "scope": "system",
+  "source": "cs",
+  "home_id": "THING_SERVER_ID",
+  "client_id": "THING_SERVER_ID",
+  "parent_id": "",
+  "created_time": 1649414442469,
+  "auth_token": "",
+  "data": {
+    "zone_count": 0,
+    "scene_count": 0,
+    "device_count": 36,
+    "system_info": {
+      "id": "THING_SERVER_ID",
+      "name": "Thing Server",
+      "address": "Server Address",
+      "version": "1.0.0",
+      "attributes": {}
+    }
+  }
+}
+----
+

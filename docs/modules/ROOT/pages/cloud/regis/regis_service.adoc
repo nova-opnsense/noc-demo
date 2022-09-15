@@ -1,0 +1,731 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Regis Service*
+:toc: left
+
+== *Overview*
+
+- Authen Sequence.
+- API Structure.
+- Regis Service APIs.
+
+== *Revision history*
+
+[cols="1,1,1,3",options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|04/25/2022
+|Duy Huynh
+|1.0
+|Initial version.
+
+|===
+
+== *Authen Sequence*
+
+[plantuml,"get_authen_info_sequence",png]
+----
+@startuml
+autonumber
+App -> AuthenService: Request Login
+AuthenService -> AuthenService: Generate Authen Info
+AuthenService --> App: Return Authen Info
+App -> ThingService: Set JWT Token
+ThingService -> ThingService: Store JWT Token
+@enduml
+----
+
+== *API Structure*
+
+=== *Request structure*
+
+- *Endpoint Url*: _https://REGIS_SERVICE:PORT/PATH_
+- *Method*: GET, POST, PUT, DELETE (defined specifically for each API)
+- *Header*:
+
+|===
+|Key |Value
+
+|Content-Type
+|application/json; charset=UTF-8
+
+|Authorization
+|Bearer JWT_TOKEN
+|===
+
+- *Body*: payloads defined specifically for each API
+
+=== *Response  structure*
+
+- *HTTP response status*: 200, success; otherwise, will fail
+
+|===
+|Status Code |Description
+
+|200
+|Success
+
+|400
+|Bad Request
+
+|401
+|Unauthorized
+
+|403
+|Forbidden
+
+|404
+|Not Found
+
+|500
+|Internal Server Error
+
+|503
+|Service Unavailable
+|===
+
+- *Body*:
+
+*Success Payload*:
+
+[source,json]
+----
+{
+	"success": true,
+	"data": {
+		//defined specifically for each API
+	}
+}
+----
+
+*Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+== *Data Models*
+
+=== *Home Model*
+- xref:common/home_model.adoc[]
+
+=== *User Model*
+- xref:common/user_model.adoc[]
+
+=== *Country Model*
+[source,json]
+----
+{
+    "code": <string>,
+    "name": <string>
+}
+----
+
+=== *Province Model*
+[source,json]
+----
+{
+    "code": <string>,
+    "name": <string>,
+    "country_code": <string>
+}
+----
+
+=== *District Model*
+[source,json]
+----
+{
+    "code": <string>,
+    "name": <string>,
+    "province_code": <string>
+}
+----
+
+== *APIs*
+
+=== *Register Home*
+
+==== *Sequence*
+
+[plantuml,"register_home_sequence",png]
+----
+@startuml
+autonumber
+ThingService -> RegisService: Request Register Home\n with AuthenInfo
+RegisService -> RegisService: Validate AuthenInfo
+alt authen case
+RegisService -> RegisService: Store Home + User Admin
+RegisService --> ThingService: Return Register Home Reponse
+else un-authen case
+autonumber 3 1
+RegisService --> ThingService: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _POST_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/homes/register_
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "home": {
+      <home_model>
+  },
+  "admin": {
+      <user_model>
+  }
+}
+----
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "id": <string>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Home Detail*
+
+==== *Sequence*
+
+[plantuml,"get_home_details_sequence",png]
+----
+@startuml
+autonumber
+ThingService -> RegisService: Request Home Info\n with AuthenInfo
+RegisService -> RegisService: Validate AuthenInfo
+alt authen case
+RegisService --> ThingService: Return Home Detail
+else un-authen case
+autonumber 3 1
+RegisService --> ThingService: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/homes/<homeId>/detail_
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        <home_model>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Home List*
+
+==== *Sequence*
+
+[plantuml,"get_home_list_sequence",png]
+----
+@startuml
+autonumber
+ThingService -> RegisService: Request Home List\n with AuthenInfo
+RegisService -> RegisService: Validate AuthenInfo
+alt authen case
+RegisService --> ThingService: Return Home List
+else un-authen case
+autonumber 3 1
+RegisService --> ThingService: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/homes/list_
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": [
+        <home_model>,
+        <home_model>
+    ]
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Request NATS Info*
+
+==== *Sequence*
+
+[plantuml,"get_nats_info_sequence",png]
+----
+@startuml
+autonumber
+ThingService -> RegisService: Request NATS Info\n with AuthenInfo
+RegisService -> RegisService: Validate AuthenInfo
+alt authen case
+RegisService -> RegisService: Check Home Permission
+RegisService -> RegisService: Generate User Creds
+RegisService --> ThingService: Return NATS Info Reponse with User Creds
+else un-authen case
+autonumber 3 1
+RegisService --> ThingService: Return Un-Authorized Error
+end
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Header*: _Authorization: Bearer JWT_TOKEN_
+
+- *Path*: _/api/nats/<homeId>/info_
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "urls": [
+          <string>
+          ],
+        "creds": <string>,
+        "jwt": <string>,
+        "nkey": <string>,
+        "expire": <int>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Country List*
+
+==== *Sequence*
+
+[plantuml,"get_country_sequence",png]
+----
+@startuml
+autonumber
+TabletApp -> RegisService: Request Get Country List
+RegisService -> RegisService: Get Country List
+RegisService --> TabletApp: Return Country List
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Path*: _/api/locations/countries/filter_
+
+- *Parameters*:
+
+[cols="1,2,3", options="header"]
+|===
+|*Key*
+|*Data Type*
+|*Required?*
+
+|page
+|Int (start with 0, default: 0)
+|N
+
+|size
+|Int (min: 1, default: 10)
+|N
+
+|sort
+|String (fieldName,sortType, Example: name,asc)
+|N
+|===
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "content": [
+            <country_model>,
+        ],
+        "totalPages": <int>,
+        "totalElements": <int>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get Province List*
+
+==== *Sequence*
+
+[plantuml,"get_province_sequence",png]
+----
+@startuml
+autonumber
+TabletApp -> RegisService: Request Get Province List
+RegisService -> RegisService: Get Province List
+RegisService --> TabletApp: Return Province List
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Path*: _/api/locations/provinces/filter_
+
+- *Parameters*:
+
+[cols="1,2,3", options="header"]
+|===
+|*Key*
+|*Data Type*
+|*Required?*
+
+|page
+|Int (start with 0, default: 0)
+|N
+
+|size
+|Int (min: 1, default: 10)
+|N
+
+|sort
+|String (fieldName,sortType, Example: name,asc)
+|N
+
+|country_code
+|String
+|N
+|===
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "content": [
+            <province_model>,
+        ],
+        "totalPages": <int>,
+        "totalElements": <int>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+=== *Get District List*
+
+==== *Sequence*
+
+[plantuml,"get_district_sequence",png]
+----
+@startuml
+autonumber
+TabletApp -> RegisService: Request Get District List
+RegisService -> RegisService: Get District List
+RegisService --> TabletApp: Return District List
+@enduml
+----
+
+==== *Request*
+
+- *Method*: _GET_
+
+- *Path*: _/api/locations/districts/filter_
+
+- *Parameters*:
+
+[cols="1,2,3", options="header"]
+|===
+|*Key*
+|*Data Type*
+|*Required?*
+
+|page
+|Int (start with 0, default: 0)
+|N
+
+|size
+|Int (min: 1, default: 10)
+|N
+
+|sort
+|String (fieldName,sortType, Example: name,asc)
+|N
+
+|province_code
+|String
+|N
+|===
+
+==== *Response*
+
+- *Success Payload*:
+
+[source,json]
+----
+{
+    "success": true,
+    "data": {
+        "content": [
+            <district_model>,
+        ],
+        "totalPages": <int>,
+        "totalElements": <int>
+    }
+}
+----
+
+- *Error Payload*:
+
+[source,json]
+----
+{
+	"success": false,
+	"error_info": {
+		"code": <int>,
+		"message": <string>
+	}
+}
+----
+
+
+== *Weather Update*
+
+=== *Sequence*
+
+[plantuml,"weather_update_sequence",png]
+----
+@startuml
+autonumber
+ThingService -> RegisService: Send event 'ts.app.home.updated' \n with Location info
+RegisService -> RegisService: Detect location's district/city
+alt has-location case
+RegisService -> AccuWeather: Get LocaltionKey from district/city
+alt has-location-key case
+AccuWeather --> RegisService: Return LocaltionKey
+RegisService -> RegisService: Save LocaltionKey to HomeInfo
+RegisService --> ThingService: Send event 'cs.ts.home.updated' \n with Home info
+else no-location-key case
+autonumber 4 1
+RegisService -> RegisService: Do nothing
+end
+end
+@enduml
+----
+
+- *Note:* If found more than one *LocaltionKey*, then pick the first *LocaltionKey*
+
+=== *NATS subject*
+
+- *cs.weather.[LocaltionKey]*
+
+- *Payload*:
+
+[source,json]
+----
+{
+  "name": "cs.ts.weather.updated",
+  "scope": "weather",
+  "source": "cs",
+  "home_id": "",
+  "user_id": "",
+  "id": "MESSAGE_ID",
+  "auth_token": "AUTH_TOKEN", // get from IdService
+  "parent_id": "",
+  "client_id": "REGIS_ID",
+  "created_time": 1584501452048,
+  "data": {
+    // TODO
+  }
+}
+----
+
+=== *Data Models*
+
+==== *Home Model*
+- xref:common/home_model.adoc[]
+
+[source,json]
+----
+{
+  ...
+  "attributes": {
+    // location infos
+    "location.district": <string>,
+    "location.city": <string>,
+    "location.country": <string>,
+    "location.key": <string>
+  }
+}
+----
+
+=== *Database Tables*
+
+==== *service_instance*
+|===
+|Column |Data Type|Description
+
+|id
+|Int
+|Auto Increment
+
+|name
+|String
+|Service name
+
+|last_query
+|DateTime
+|Change every 15 minutes
+|===
+
+*Note:*
+
+- Service is UP if last_query < 15 minutes
+- *ServiceScheduleCleanUp* will run every 30 minutes
+
+==== *weather_location_code*
+|===
+|Column |Data Type|Description
+
+|id
+|Int
+|Auto Increment
+
+|code
+|String
+|AccuWeather's Location Key
+|===
+

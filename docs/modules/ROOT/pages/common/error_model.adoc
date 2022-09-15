@@ -1,0 +1,53 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+
+= *Error Model*
+:toc: left
+
+== *Overview*
+- Data Structure.
+- Error Codes.
+
+== *Revision history*
+
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+|12/04/2022
+|Nga Le
+|1.0
+|Initial version.
+|===
+
+== *Data Structure*
+
+=== *Error Structure*:
+
+[source,json]
+----
+{
+  "code": <int>,
+  "message": <string>
+}
+----
+
+== *Error Codes*:
+
+[source,c++]
+----
+// error code
+NoError = 0,
+UserHasNotAuthorize = 1,     // user has not authorize
+InvalidDeviceInfo = 2,       // device info is invalid
+DeviceIsNotExist = 3,        // device is not existed
+HomeIsConnectedToCloud = 4,  // home is connected to cloud
+InvalidAdminEmail = 5,       // invalid admin email
+FailedToGetJWKS = 6,         // could not get jwks
+FailedToRegisterHome = 7,    // could not register home
+----

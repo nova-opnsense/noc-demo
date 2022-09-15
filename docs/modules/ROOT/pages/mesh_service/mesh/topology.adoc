@@ -1,0 +1,596 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Topology*
+:toc: left
+
+:pic:       Tho Do
+
+== *Overview*
+[%autowidth.stretch]
+[cols="1,1,3", options="header"]
+|===
+|*STT*
+|*Features*
+|*Description*
+
+|{counter:feature}
+|Request Device List
+|Get current device list of Mesh System
+
+|{counter:feature}
+|Request Device List available for pairing
+|Discover Avahi Publisher in network and check whether It's not joined. 
+
+|{counter:feature}
+|Request Pair Device
+|Available device in Network will be paired by IP and ezm_id
+
+|{counter:feature}
+|Broadcast Device List Change
+|When Mesh have new device joined or left, It will notify to Web
+
+|{counter:feature}
+|Update Device
+|Update Fields of device (ezm_name , ...).
+
+|{counter:feature}
+|Delete Device
+|Delete Agent Device from Mesh by IP and ezm_id
+
+|===
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+| 01/07/2022
+|{pic}
+| 1.0.1
+|Mesh-Topology
+
+| 06/07/2022
+|{pic}
+| 2.0.0
+| Update API Struct (Mesh Setting) , Request Name
+
+| 26/07/2022
+|{pic}
+| 2.0.1
+|  - New API: Request device for pairing , Delete Device. +
+- Update Pair Device API
+
+| 01/08/2022
+|{pic}
+| 2.0.1
+|  - Update Sequence Diagram
+
+|===
+
+
+== *Device model*
+
+
+=== *Device structure*
+
+[source,json]
+----
+{
+    "hub_id": <string>,
+    "ezm_id": <string>,
+    "ezm_version": <string>,
+    "ezm_name": <string>,
+    "role": <string>,
+    "ip": <string>,
+    "mac": <string>,
+    "channel_selection": <int>,
+    "parent_mac": <string>
+}
+----
+== *API*
+=== *Request Device List*
+==== Flow
+[plantuml, "request_device_list", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Device List Request.
+alt success case
+Ezm -> Ezm:  Get All AP device in Mesh Network
+Ezm --> Web: Return Device List
+else failed case
+autonumber 2 1
+Ezm --> Web: Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.devices.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.devices.responded",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":
+        {
+            "error":
+                {
+                    "code": <int>,
+                    "message": string>
+                },
+            "data": <device_structure>[]
+        },
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before, need to create Mesh
+
+|===
+
+=== *Request Device List Available For Pairing*
+==== Flow
+[plantuml, "request_device_list_for_pairing", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Request Device List Available for pairing.
+alt success case
+Ezm -> Ezm:  Scan Device List in Network by Avahi Client
+Ezm --> Web: Return Device List not paired
+else failed case
+autonumber 2 1
+Ezm --> Web: Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.devices.available_for_pairing.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":{},
+    "created_time": <int>
+}
+----
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.devices.available_for_pairing.responded",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":
+        {
+            "error":
+                {
+                    "code": <int>,
+                    "message": string>
+                },
+            "data":<device_structure>[]
+        },
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before, need to create Mesh
+
+|===
+
+=== *Request Pair Device*
+==== Flow
+[plantuml, "request_pair_device", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Request Device List Available for pairing.
+alt success case
+Ezm -> Ezm:  Scan Device List in Network by Avahi Client
+Ezm --> Web: Return Device List not paired
+Web --> Ezm: Request Pair Device with Device Info.
+Ezm -> Ezm: Process pair new device.
+alt sucess case
+Ezm --> Web: Return New Device
+else failed case
+autonumber 6 1
+Ezm --> Web: Return Error
+end
+else failed case
+autonumber 2 1
+Ezm --> Web: Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.device.pair.requested",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<device_structure>[],
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.device.pair.responded",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":
+        {
+            "error":
+            {
+                "code": <int>,
+                "message": string>
+            },
+            "data":<device_structure>[]
+        },
+    "created_time": <int>
+}
+----
+
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|100004
+|Internal Server Error (IP Mismatched)
+
+|240001
+|Wrong Format Message
+
+|240003
+|Device Not Found
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before , need to create Mesh
+|===
+
+=== *Update Device*
+==== Flow
+[plantuml, "update_device_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Update Device List.
+Ezm -> Ezm:  Check Device exist in Mesh Network with Agent Role
+alt device exist case
+Ezm -> Ezm:  Update Device Info
+Ezm --> Web:  Return Device Info Updated
+else device not exist case
+autonumber 3 1
+Ezm --> Web:  Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.devices.updated",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<device_structure>[],
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.devices.updated",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":
+        {
+            "error":
+            {
+                "code": <int>,
+                "message": string>
+            },
+            "data":<device_structure>[]
+        },
+    "created_time": <int>
+}
+----
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240003
+|Device Not Found
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before , need to create Mesh
+|===
+
+=== *Delete Device*
+==== Flow
+[plantuml, "delete_device_sequence", png]
+----
+@startuml
+autonumber
+Web --> Ezm: Delete Device Request.
+Ezm -> Ezm:  Check Device exist in Mesh Network with Agent Role
+alt device exist case
+Ezm -> Ezm:  Delele Device from Mesh
+Ezm --> Web:  Return Device Info Delete
+else device not exist case
+autonumber 3 1
+Ezm --> Web:  Return Error
+end
+@enduml
+----
+==== Request
+[source,json]
+----
+{
+    "name": "web.hub.ezm.mesh.devices.deleted",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<device_structure>[],
+    "created_time": <int>
+}
+----
+
+==== Respond
+[source,json]
+----
+{
+    "name": "hub.web.ezm.mesh.devices.deleted",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":
+        {
+            "error":
+            {
+                "code": <int>,
+                "message": string>
+            },
+            "data":<device_structure>[]
+        },
+    "created_time": <int>
+}
+----
+==== Error Code
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Description*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240003
+|Device Not Found
+
+|240006
+|Request name invalid
+
+|240007
+|Don't have Mesh before , need to create Mesh
+|===
+
+=== *Broadcast device list changed*
+==== Flow
+[plantuml, "broadcast_device_list", png]
+----
+@startuml
+autonumber
+Ezm -> Ezm: Polling Monitor Device
+alt device list changed case
+Ezm --> Web:  Send Device Info Changed
+end
+@enduml
+----
+==== Broadcast
+[source,json]
+----
+{
+    "name": "broadcast.ezm.mesh.devices.reported",
+    "scope": <string>,
+    "source": <string>,
+    "home_id": <string>,
+    "user_id": <string>,
+    "id": <string>,
+    "auth_token": <string>,
+    "parent_id": <string>,
+    "client_id": <string>,
+    "data":<device_structure>[],
+    "created_time": <int>
+}
+----
+
+
+
+
+
+=== *Error Code*
+[%autowidth.stretch]
+[cols="1,3", options="header"]
+|===
+|*Code*
+|*Message*
+
+|0
+|Success
+
+|240001
+|Wrong Format Message
+
+|240002
+|Pair Fail
+
+|240003
+|Device Not Found
+
+|240004
+|Mesh is Setuped Before
+
+|240005
+|Mesh not found
+
+|240006
+|Request name invalid
+
+|240007
+|Easymesh Deamon connect fail
+
+|===
+
+
+== *Tasks List*
+
+[%interactive]
+
+* [x] Request Topology Device.
+* [x] Pair new device.
+* [x] Broadcast device list changed.
+* [ ] Remove device.
+

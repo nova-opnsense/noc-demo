@@ -1,0 +1,80 @@
+:sectnumlevels: 5
+:toclevels: 5
+:sectnums:
+:source-highlighter: coderay
+:imagesdir: ../../assets/images
+
+= *Mesh Concept*
+:toc: left
+
+:pic:       Tho Do
+
+== *Overview*
+
+== *Revision history*
+
+[%autowidth.stretch]
+[cols="1,1,1,3", options="header"]
+|===
+|*Date*
+|*PIC*
+|*Version*
+|*Description*
+
+| 26/07/2022
+|{pic}
+| 2.0.1
+| Create Mesh Concept
+
+|===
+
+
+== *Network Topology*
+=== Wifi - Standalone
+image::mesh_service/wifi_topology.svg[]
+*Standalone* or *AP Mode* operate nornal with DNS-DHCP Server and Default Gateway 192.168.1.1/24
+
+=== Wifimesh - Easymesh
+image::mesh_service/wifimesh_topology.svg[]
+- *Controller*: Connect directly to Internet, and set all End-device or Agent with Default Gateway 192.168.123.1/24.
+- *Agent*: Connect to Controller in Bridge Mode, get Ip from Controller DNS-DHCP Server (192.168.123.2 -> 192.168.123.255). All Device connect to Agent will be forwarded to Controller to get IP.
+- *Standalone*: Standalone In Wifimesh operate like Standalone in Wifi.
+
+== *Mode Description*
+=== *Wifi*
+==== Network
+image::mesh_service/standalone_network.svg[]
+- Br-wwan bind to eth0 (for Software)
+- Br-lan have static IP (Default Gateway) is 192.168.1.1/24
+- All Ethernet Iface and Wireless Iface will be bind to br-lan.
+
+==== DNS-DHCP
+image::mesh_service/wifi_dns_dhcp.svg[]
+- All Client (End-Device) will request DNS-DHCP request to get IP, and Hub Standalone will lease it.
+
+=== *Wifimesh*
+==== Network
+===== Controller 
+image::mesh_service/controller_network.svg[]
+- Controller have wan interface with br-wwan bind to physical port eth0.
+- Br-lan bind to all Ethernet Iface and wireless interface.
+- Br-lan have static IP as Default Gateway is 192.168.123.1/24 (distinguish Standalone Default Gateway 192.168.1.1/24)
+
+===== Agent
+image::mesh_service/agent_network.svg[]
+- Agent don't have br-wwan because It operate in Bridge Mode.
+- Br-lan will be leased IP by Controller Default Gateway (example: 192.168.123.5)
+- All End-device connect to Agent will be leased IP by Controller.
+
+==== DNS-DHCP
+image::mesh_service/wifimesh_dns_dhcp.svg[]
+All dns-dhcp request from agent will be ignored due to all end-device will send dns-dhcp request to Controller to get IP.
+
+== *API*
+
+
+== *Tasks List*
+
+[%interactive]
+
+
